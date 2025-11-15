@@ -1,0 +1,102 @@
+<div class="grid min-h-screen grid-cols-1 lg:grid-cols-3">
+  <div class="relative hidden h-full lg:col-span-2 lg:block">
+    <div
+      class="absolute inset-0 bg-black/25 bg-cover bg-center transition-opacity duration-1000"
+      [class.wrapper-img]="imageLoaded()"
+      [ngClass]="{ 'opacity-100': imageLoaded(), 'opacity-0': !imageLoaded() }"
+    ></div>
+
+    @if (!imageLoaded()) {
+    <div class="absolute inset-0 grid place-items-center bg-surface-100/50 dark:bg-surface-900/50">
+      <svg
+        class="animate-spin h-12 w-12 text-primary-500"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke-width="4"
+          stroke="currentColor"
+        ></circle>
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
+    </div>
+    }
+  </div>
+
+  <div
+    class="col-span-1 flex flex-col justify-center items-center p-6 sm:p-12 lg:p-16 rounded-lg lg:rounded-none shadow-xl lg:shadow-none"
+  >
+    <div class="w-full max-w-md">
+      <div class="absolute right-3 top-10">
+        <app-control-theme />
+      </div>
+      <div class="text-center mb-10">
+        <h1 class="text-3xl font-extrabold tracking-tight">FACTUS</h1>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Inicia sesión para continuar</p>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+        <div>
+          <p-inputgroup>
+            <p-inputgroup-addon>
+              <i class="pi pi-user text-primary-500"></i>
+            </p-inputgroup-addon>
+
+            <p-floatlabel variant="on" [style]="{ width: '100%' }">
+              <input pInputText id="username" type="text" formControlName="username" />
+              <label for="username">Usuario</label>
+            </p-floatlabel>
+          </p-inputgroup>
+        </div>
+        <div>
+          <p-inputgroup>
+            <p-inputgroup-addon>
+              <i class="pi pi-lock text-primary-500"></i>
+            </p-inputgroup-addon>
+
+            <p-floatlabel variant="on" [style]="{ width: '100%' }">
+              <p-password
+                id="password"
+                formControlName="password"
+                [toggleMask]="true"
+                [feedback]="false"
+                [style]="{ width: '100%' }"
+              />
+              <label for="password">Contraseña</label>
+            </p-floatlabel>
+          </p-inputgroup>
+        </div>
+        @if (isError()) {
+        <p-message closable="true" severity="error">{{ isError() }}</p-message>
+        }
+        <!-- <div class="flex items-center justify-end pt-2">
+          <div class="text-sm">
+            <a class="font-semibold text-primary-500 cursor-pointer transition duration-200">
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+        </div> -->
+        <div class="mt-5">
+          <p-button
+            type="submit"
+            label="Iniciar Sesión"
+            [loading]="isLoading()"
+            [disabled]="form.invalid || isLoading()"
+            icon="pi pi-sign-in"
+            iconPos="right"
+            [style]="{ width: '100%' }"
+          />
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

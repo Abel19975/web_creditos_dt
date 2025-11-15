@@ -1,0 +1,139 @@
+<div
+  class="fixed inset-0 bg-black/50 bg-opacity-50 z-40 md:hidden"
+  [class.hidden]="!sidebarSvc.isOpen()"
+  (click)="sidebarSvc.toggleSidebar()"
+></div>
+
+<aside
+  [ngClass]="{
+    'w-64': sidebarSvc.isExpanded(),
+    'w-16': !sidebarSvc.isExpanded(),
+    'fixed md:relative': true,
+    'translate-x-0': sidebarSvc.isOpen(),
+    '-translate-x-full': !sidebarSvc.isOpen(),
+  }"
+  class="bg-sidebar h-screen flex flex-col transition-all duration-300 ease-in-out z-50 md:z-auto md:translate-x-0 p-2"
+>
+  <!-- header sidebar -->
+  <div class="flex items-center justify-between h-16 mb-4">
+    @if (sidebarSvc.isExpanded()) {
+      <span
+        class="cursor-pointer text-xl font-semibold whitespace-nowrap overflow-hidden text-ellipsis max-w-full block transition-opacity duration-200"
+        routerLink="/"
+      >
+        {{ label() }}
+      </span>
+    }
+    <button
+      (click)="sidebarSvc.toggleSidebar()"
+      class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors cursor-pointer"
+      title="Alternar barra lateral"
+    >
+      @if (sidebarSvc.isExpanded()) {
+        <i class="pi pi-times text-xl"></i>
+      } @else {
+        <i class="pi pi-bars text-xl"></i>
+      }
+    </button>
+  </div>
+
+  <nav class="space-y-1 overflow-y-auto overflow-x-hidden">
+    @for (item of sidebarSvc.menuItems(); track item.label) {
+      @if (!item.children) {
+        <a
+          [routerLink]="item.link"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          (click)="sidebarSvc.closeOnMobile()"
+          class="flex items-center p-2 hover-sidebar group text-sm cursor-pointer"
+        >
+          <div class="w-8 flex items-center justify-center">
+            <i [class]="'pi pi-fw ' + item.icon + ' text-xl'"></i>
+          </div>
+          <span
+            class="font-medium whitespace-nowrap overflow-hidden transition-all duration-200 ease-in-out"
+            [ngClass]="{
+              'opacity-100 max-w-xs ml-2': sidebarSvc.isExpanded(),
+              'opacity-0 max-w-0 ml-0': !sidebarSvc.isExpanded(),
+            }"
+          >
+            {{ item.label }}
+          </span>
+        </a>
+      }
+      @if (item.children) {
+        <div>
+          <a
+            (click)="sidebarSvc.toggleSubmenu(item.label)"
+            class="flex items-center p-2 hover-sidebar text-sm justify-between cursor-pointer"
+          >
+            <div class="flex items-center">
+              <div class="w-8 flex items-center justify-center">
+                <i [class]="'pi pi-fw ' + item.icon + ' text-xl'"></i>
+              </div>
+              <span
+                class="font-medium whitespace-nowrap overflow-hidden transition-all duration-200 ease-in-out"
+                [ngClass]="{
+                  'opacity-100 max-w-xs ml-2': sidebarSvc.isExpanded(),
+                  'opacity-0 max-w-0 ml-0': !sidebarSvc.isExpanded(),
+                }"
+              >
+                {{ item.label }}
+              </span>
+            </div>
+            <i
+              class="pi pi-chevron-down transition-all duration-300 ease-in-out"
+              [class.rotate-180]="sidebarSvc.openSubmenus().has(item.label)"
+              [class.opacity-0]="!sidebarSvc.isExpanded()"
+            ></i>
+          </a>
+          <div
+            class="overflow-hidden transition-all duration-300 ease-in-out"
+            [ngClass]="
+              sidebarSvc.openSubmenus().has(item.label) && sidebarSvc.isExpanded()
+                ? 'max-h-[300px] mt-1'
+                : 'max-h-0'
+            "
+          >
+            @if (sidebarSvc.isExpanded()) {
+              <div class="ml-4 pl-4 border-l-2 border-surface-300 dark:border-surface-700">
+                <div class="space-y-1 py-1">
+                  @for (child of item.children; track child.label) {
+                    <a
+                      [routerLink]="child.link"
+                      routerLinkActive="active"
+                      class="flex items-center p-2 hover-sidebar group text-sm"
+                      (click)="sidebarSvc.closeOnMobile()"
+                    >
+                      <div class="w-8 flex items-center justify-center">
+                        <i [class]="'pi pi-fw ' + child.icon + ' text-lg'"></i>
+                      </div>
+                      <span class="ml-2 whitespace-nowrap overflow-hidden">{{ child.label }}</span>
+                    </a>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  </nav>
+
+  <div class="mt-auto pt-2 border-t border-surface-200 dark:border-surface-700 space-y-1">
+    <a (click)="logout()" class="flex items-center p-2 hover-sidebar group text-sm cursor-pointer">
+      <div class="w-8 flex items-center justify-center">
+        <i class="pi pi-fw pi-sign-out text-xl"></i>
+      </div>
+      <span
+        class="font-medium whitespace-nowrap overflow-hidden transition-all duration-200 ease-in-out"
+        [ngClass]="{
+          'opacity-100 max-w-xs ml-2': sidebarSvc.isExpanded(),
+          'opacity-0 max-w-0 ml-0': !sidebarSvc.isExpanded(),
+        }"
+      >
+        Cerrar sesión
+      </span>
+    </a>
+  </div>
+</aside>

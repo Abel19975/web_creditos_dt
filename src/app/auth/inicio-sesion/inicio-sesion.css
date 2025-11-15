@@ -1,0 +1,6 @@
+.wrapper-img {
+  background-image: url('/imagenes/imagen-inicio-sesion.png');
+  background-repeat: no-repeat;
+  background-size: contain;
+  transition: opacity 0.3s ease-in;
+}

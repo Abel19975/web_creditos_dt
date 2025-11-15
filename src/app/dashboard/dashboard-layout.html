@@ -1,0 +1,11 @@
+<div class="flex h-screen">
+  <app-sidebar [label]="'Créditos Calceta'" />
+  <div class="flex flex-col grow">
+    <app-header />
+    <main class="grow p-5 overflow-auto">
+      <div class="card">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+  </div>
+</div>
