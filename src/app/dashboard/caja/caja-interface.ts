@@ -15,6 +15,7 @@ export interface Caja {
   created_at: Date;
   updated_at: Date;
   empleado: Empleado;
+  arqueado: boolean
 }
 
 export interface Empleado {
