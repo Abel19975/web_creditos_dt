@@ -172,6 +172,7 @@
         <!-- header -->
         <ng-template #header>
           <tr>
+            <th class="dark:bg-slate-800! bg-primary-100!">Código empleado</th>
             <th class="dark:bg-slate-800! bg-primary-100!">Empleado</th>
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
               Saldo anterior
@@ -216,6 +217,9 @@
         <!-- body -->
         <ng-template #body let-historial>
           <tr>
+            <td data-label="Empleado">
+              {{ historial.empleado.persona.id }}
+            </td>
             <td data-label="Empleado">
               {{ historial.empleado.persona.nombre_completo }}
             </td>
