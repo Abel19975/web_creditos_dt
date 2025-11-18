@@ -7,34 +7,36 @@
       <div class="flex flex-col md:flex-row justify-center items-center gap-2 mb-2">
         <p-floatlabel variant="on">
           <p-datepicker
-            inputId="on_label"
+            [(ngModel)]="fechaInicio"
+            inputId="fecha_inicio_picker"
             showIcon
             iconDisplay="input"
             appendTo="body"
+            [maxDate]="maxDate()"
             size="small"
             dateFormat="dd/mm/yy"
             fluid
-            [(ngModel)]="fechaInicio"
           />
           <label for="on_label">Fecha inicio</label>
         </p-floatlabel>
         <p-floatlabel variant="on">
           <p-datepicker
-            inputId="on_label"
+            [(ngModel)]="fechaFin"
+            inputId="fecha_fin_picker"
             showIcon
             iconDisplay="input"
             appendTo="body"
+            [maxDate]="maxDate()"
             size="small"
             dateFormat="dd/mm/yy"
             fluid
-            [(ngModel)]="fechaFin"
           />
           <label for="on_label">Fecha fin</label>
         </p-floatlabel>
         <p-autocomplete
           [dropdown]="true"
           [suggestions]="empleados()"
-          (completeMethod)="onSearch($event)"
+          (completeMethod)="buscarEmpleado($event)"
           size="small"
           appendTo="body"
           optionLabel="persona.nombre_completo"

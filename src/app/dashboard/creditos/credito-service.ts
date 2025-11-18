@@ -19,11 +19,11 @@ export class CreditoService {
   }
 
   async listarCreditos(
-    estado?: string,
-    otorganteId?: number,
-    fechaInicio?: string,
-    fechaFin?: string,
-    search?: string,
+    estado: string | null,
+    otorganteId: number | null,
+    fechaInicio: string | null,
+    fechaFin: string | null,
+    search: string | null,
     page: number = 1,
     perPage: number = 15,
   ) {
@@ -38,9 +38,12 @@ export class CreditoService {
     params = params.set('per_page', perPage.toString());
 
     return await firstValueFrom(
-      this.http.get<{ data: Credito[]; pagination: any }>(`${environment.apiUrl}/creditos`, {
-        params,
-      }),
+      this.http.get<{ fecha_inicio: string; fecha_fin: string; data: Credito[]; pagination: any }>(
+        `${environment.apiUrl}/creditos`,
+        {
+          params,
+        },
+      ),
     );
   }
 }

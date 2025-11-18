@@ -12,8 +12,8 @@ import { Empleado } from '../../empleados/empleado-interface';
 import { DatePicker } from 'primeng/datepicker';
 import { AlertService } from '../../../shared/services/alert.service';
 import { Tooltip } from 'primeng/tooltip';
-
-const RANGO_DIAS = 9;
+import { UtilidadesFecha } from '../../../shared/utils/utils';
+import { FechaUtcService } from '../../../shared/utils/fecha-utc-service';
 
 @Component({
   selector: 'app-historial',
@@ -34,6 +34,7 @@ const RANGO_DIAS = 9;
 export default class Historial implements OnInit {
   private historialSvc = inject(CajaService);
   protected alerta = inject(AlertService);
+  protected fechaUtcSvc = inject(FechaUtcService);
 
   protected historial = signal<Caja[]>([]);
   protected totalesHistorial = signal<TotalCaja | null>(null);
@@ -45,17 +46,64 @@ export default class Historial implements OnInit {
 
   protected empleadoSeleccionado = signal<Empleado | null>(null);
 
-  protected fechaInicio = signal<Date>(
-    new Date(new Date().setDate(new Date().getDate() - RANGO_DIAS)),
-  );
-  protected fechaFin = signal<Date>(new Date());
+  protected fechaInicio = signal<Date | null>(null);
+  protected fechaFin = signal<Date | null>(null);
+  protected fechaInicioAux = signal<Date | null>(null);
   protected maxDate = signal<Date>(new Date());
 
-  private formatearFecha(fecha: Date): string {
-    const año = fecha.getFullYear();
-    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-    const día = String(fecha.getDate()).padStart(2, '0');
-    return `${año}-${mes}-${día}`;
+  // OBTENER SALDOS ACTUALES DE TODOS LOS EMPLEADOS
+  async obtenerSaldosActualesEmpleados() {
+    const saldoActuales = await this.historialSvc.obtenerSaldosActualesEmpleados();
+    this.saldoActuales.set(saldoActuales);
+  }
+
+  // OBTENER HISTORIAL ARQUEOS DE CAJA
+  async cargarHistorialArqueos() {
+    const inicio = this.fechaInicio();
+    const fin = this.fechaFin();
+    const empleadoId = this.empleadoSeleccionado() ? this.empleadoSeleccionado()!.persona_id : null;
+    const res = await this.historialSvc.obtenerHistorialArqueos({
+      fecha_inicio: inicio ? UtilidadesFecha.formatearFecha(inicio) : null,
+      fecha_fin: fin ? UtilidadesFecha.formatearFecha(fin) : null,
+      empleado_id: empleadoId,
+    });
+    this.historial.set(res.arqueos);
+    this.totalesHistorial.set(res.totales);
+
+    const fechaInicio = this.fechaUtcSvc.convertirUtcALocal(res.fecha_inicio);
+    const fechaFin = this.fechaUtcSvc.convertirUtcALocal(res.fecha_fin);
+
+    this.fechaInicio.set(fechaInicio);
+    this.fechaFin.set(fechaFin);
+    if (this.fechaInicioAux()) return;
+    this.fechaInicioAux.set(fechaInicio);
+  }
+
+  // OBTENER HISTORIAL DE MOVIMIENTOS
+  async cargarMovimientos() {
+    const inicio = this.fechaInicio();
+    const fin = this.fechaFin();
+    const empleadoId = this.empleadoSeleccionado() ? this.empleadoSeleccionado()!.persona_id : null;
+    const res = await this.historialSvc.obtenerMovimientos({
+      fecha_inicio: inicio ? UtilidadesFecha.formatearFecha(inicio) : null,
+      fecha_fin: fin ? UtilidadesFecha.formatearFecha(fin) : null,
+      empleado_id: empleadoId,
+    });
+    this.movimientos.set(res.movimientos);
+  }
+
+  // OBTENER EMPLEADOS
+  async obtenerEmpleados() {
+    const res = await this.historialSvc.obtenerEmpleados();
+    this.todosLosEmpleados.set(res.data);
+    this.empleados.set(res.data);
+  }
+  protected buscarEmpleado(event: AutoCompleteCompleteEvent) {
+    const query = event.query.toLowerCase();
+    const filtrados = this.todosLosEmpleados().filter((empleado) =>
+      empleado.persona.nombre_completo.toLowerCase().includes(query),
+    );
+    this.empleados.set(filtrados);
   }
 
   async arquearCaja(empleado: Empleado) {
@@ -69,73 +117,28 @@ export default class Historial implements OnInit {
     this.alerta.exito('Éxito', mensaje);
   }
 
-  async cargarHistorial() {
-    const inicio = this.fechaInicio();
-    const fin = this.fechaFin();
-    const empleadoId = this.empleadoSeleccionado() ? this.empleadoSeleccionado()!.persona_id : null;
-    const res = await this.historialSvc.obtenerHistorialArqueos({
-      fecha_inicio: this.formatearFecha(inicio),
-      fecha_fin: this.formatearFecha(fin),
-      empleado_id: empleadoId,
-    });
-    this.historial.set(res.arqueos);
-    this.totalesHistorial.set(res.totales);
-  }
-
-  async obtenerSaldosActualesEmpleados() {
-    const saldoActuales = await this.historialSvc.obtenerSaldosActualesEmpleados();
-    this.saldoActuales.set(saldoActuales);
-  }
-
-  protected search(event: AutoCompleteCompleteEvent) {
-    const query = event.query.toLowerCase();
-    const filtrados = this.todosLosEmpleados().filter((empleado) =>
-      empleado.persona.nombre_completo.toLowerCase().includes(query),
-    );
-    this.empleados.set(filtrados);
-  }
-
-  async cargarMovimientos() {
-    const inicio = this.fechaInicio();
-    const fin = this.fechaFin();
-    const empleadoId = this.empleadoSeleccionado() ? this.empleadoSeleccionado()!.persona_id : null;
-    const movimientos = await this.historialSvc.obtenerMovimientos({
-      fecha_inicio: this.formatearFecha(inicio),
-      fecha_fin: this.formatearFecha(fin),
-      empleado_id: empleadoId,
-    });
-    this.movimientos.set(movimientos);
-  }
-
-  async cargarEmpleados() {
-    const res = await this.historialSvc.obtenerEmpleados();
-    this.todosLosEmpleados.set(res.data);
-    this.empleados.set(res.data);
-  }
-
-  protected onFechaChange() {
-    this.cargarHistorial();
-  }
   protected resetearFiltros() {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
-    const hace9Dias = new Date(hoy);
-    hace9Dias.setDate(hace9Dias.getDate() - RANGO_DIAS);
-
-    this.fechaInicio.set(hace9Dias);
+    this.fechaInicio.set(this.fechaInicioAux());
     this.fechaFin.set(hoy);
     this.empleadoSeleccionado.set(null);
     this.cargarDatos();
   }
+
   async cargarDatos() {
-    await this.cargarEmpleados();
-    await this.cargarHistorial();
+    await this.obtenerEmpleados();
+    await this.cargarHistorialArqueos();
     await this.obtenerSaldosActualesEmpleados();
     await this.cargarMovimientos();
   }
 
   ngOnInit(): void {
+    const hoy = new Date();
+    hoy.setHours(23, 59, 59, 999);
+    this.maxDate.set(hoy);
+
     this.cargarDatos();
   }
 }

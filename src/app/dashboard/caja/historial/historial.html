@@ -20,23 +20,19 @@
             <th class="dark:bg-slate-800! bg-primary-100!">Código empleado</th>
             <th class="dark:bg-slate-800! bg-primary-100!">Empleado</th>
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
-              Saldo anterior
+              Caja anterior
             </th>
-            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
-              Total recaudado
-            </th>
+            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">Cobros</th>
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
               Microseguros
             </th>
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
               Total ingresos
             </th>
-            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
-              Total desembolso
-            </th>
-            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
+            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">Créditos</th>
+            <!-- <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
               Otros egresos
-            </th>
+            </th> -->
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
               Total egresos
             </th>
@@ -62,16 +58,16 @@
         <!-- body -->
         <ng-template #body let-historial>
           <tr>
-            <td data-label="Empleado">
+            <td data-label="Código empleado">
               {{ historial.empleado.persona.id }}
             </td>
             <td data-label="Empleado">
               {{ historial.empleado.persona.nombre_completo }}
             </td>
-            <td data-label="Saldo anterior" style="text-align: right">
+            <td data-label="Caja anterior" style="text-align: right">
               {{ historial.saldo_anterior | currency }}
             </td>
-            <td data-label="Total recaudado" style="text-align: right">
+            <td data-label="Cobros" style="text-align: right">
               {{ historial.total_recaudado | currency }}
             </td>
             <td data-label="Microseguros" style="text-align: right">
@@ -80,12 +76,12 @@
             <td data-label="Total ingresos" style="text-align: right">
               {{ historial.total_ingresos | currency }}
             </td>
-            <td data-label="Total desembolso" style="text-align: right">
+            <td data-label="Créditos" style="text-align: right">
               {{ historial.total_desembolso | currency }}
             </td>
-            <td data-label="Otros egresos" style="text-align: right">
+            <!-- <td data-label="Otros egresos" style="text-align: right">
               {{ historial.total_otros_egresos | currency }}
-            </td>
+            </td> -->
             <td data-label="Total egresos" style="text-align: right">
               <b>
                 {{ historial.total_egresos | currency }}
@@ -136,35 +132,34 @@
         <p-floatlabel variant="on">
           <p-datepicker
             [(ngModel)]="fechaInicio"
-            inputId="on_label"
+            inputId="fecha_inicio_picker"
             showIcon
             iconDisplay="input"
             appendTo="body"
-            [maxDate]="maxDate()"
             size="small"
             dateFormat="dd/mm/yy"
             fluid
           />
-          <label for="on_label">Fecha inicio</label>
+          <label for="fecha_inicio_picker">Fecha inicio</label>
         </p-floatlabel>
+
         <p-floatlabel variant="on">
           <p-datepicker
             [(ngModel)]="fechaFin"
-            inputId="on_label"
+            inputId="fecha_fin_picker"
             showIcon
             iconDisplay="input"
             appendTo="body"
-            [maxDate]="maxDate()"
             size="small"
             dateFormat="dd/mm/yy"
             fluid
           />
-          <label for="on_label">Fecha fin</label>
+          <label for="fecha_fin_picker">Fecha fin</label>
         </p-floatlabel>
         <p-autocomplete
           [dropdown]="true"
           [suggestions]="empleados()"
-          (completeMethod)="search($event)"
+          (completeMethod)="buscarEmpleado($event)"
           size="small"
           appendTo="body"
           optionLabel="persona.nombre_completo"
@@ -214,23 +209,19 @@
             <th class="dark:bg-slate-800! bg-primary-100!">Fecha arqueo</th>
             <th class="dark:bg-slate-800! bg-primary-100!">Empleado</th>
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
-              Saldo anterior
+              Caja anterior
             </th>
-            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
-              Total recaudado
-            </th>
+            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">Cobros</th>
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
               Microseguros
             </th>
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
               Total ingresos
             </th>
-            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
-              Total desembolso
-            </th>
-            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
+            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">Créditos</th>
+            <!-- <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
               Otros egresos
-            </th>
+            </th> -->
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
               Total egresos
             </th>
@@ -257,10 +248,10 @@
             <td data-label="Empleado">
               {{ historial.empleado.persona.nombre_completo }}
             </td>
-            <td data-label="Saldo anterior" style="text-align: right">
+            <td data-label="Caja anterior" style="text-align: right">
               {{ historial.saldo_anterior | currency }}
             </td>
-            <td data-label="Total recaudado" style="text-align: right">
+            <td data-label="Cobros" style="text-align: right">
               {{ historial.total_recaudado | currency }}
             </td>
             <td data-label="Microseguros" style="text-align: right">
@@ -269,12 +260,12 @@
             <td data-label="Total ingresos" style="text-align: right">
               {{ historial.total_ingresos | currency }}
             </td>
-            <td data-label="Total desembolso" style="text-align: right">
+            <td data-label="Créditos" style="text-align: right">
               {{ historial.total_desembolso | currency }}
             </td>
-            <td data-label="Otros egresos" style="text-align: right">
+            <!-- <td data-label="Otros egresos" style="text-align: right">
               {{ historial.total_otros_egresos | currency }}
-            </td>
+            </td> -->
             <td data-label="Total egresos" style="text-align: right">
               {{ historial.total_egresos | currency }}
             </td>
@@ -311,9 +302,9 @@
             <td style="text-align: right" class="px-4 py-3">
               {{ totalesHistorial()?.total_desembolso | currency }}
             </td>
-            <td style="text-align: right" class="px-4 py-3">
+            <!-- <td style="text-align: right" class="px-4 py-3">
               {{ totalesHistorial()?.total_otros_egresos | currency }}
-            </td>
+            </td> -->
             <td style="text-align: right" class="px-4 py-3">
               {{ totalesHistorial()?.total_egresos | currency }}
             </td>
@@ -356,6 +347,8 @@
             <th class="dark:bg-slate-800! bg-primary-100!">Fecha movimiento</th>
             <th class="dark:bg-slate-800! bg-primary-100!">Empleado</th>
             <th class="dark:bg-slate-800! bg-primary-100!">Tipo movimiento</th>
+            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">Monto</th>
+            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">Saldo</th>
             <th class="dark:bg-slate-800! bg-primary-100!">Descripción</th>
           </tr>
         </ng-template>
@@ -374,6 +367,12 @@
             </td>
             <td data-label="Tipo movimiento">
               {{ historial.tipo }}
+            </td>
+            <td data-label="Monto" style="text-align: right">
+              {{ historial.monto | currency }}
+            </td>
+            <td data-label="Saldo" style="text-align: right">
+              {{ historial.saldo_resultante | currency }}
             </td>
             <td data-label="Descripción">
               {{ historial.descripcion }}

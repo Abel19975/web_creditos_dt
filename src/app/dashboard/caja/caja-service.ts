@@ -12,16 +12,6 @@ export class CajaService {
   private http = inject(HttpClient);
   private url = `${environment.apiUrl}/caja`;
 
-  async obtenerMovimientos(parametros: {
-    fecha_inicio: string;
-    fecha_fin: string;
-    empleado_id: number | null;
-  }) {
-    return await firstValueFrom(
-      this.http.post<Movimientos[]>(`${this.url}/historial-movimientos`, parametros),
-    );
-  }
-
   async obtenerEmpleados() {
     return await firstValueFrom(
       this.http.get<{ data: Empleado[] }>(`${environment.apiUrl}/empleados`),
@@ -42,16 +32,33 @@ export class CajaService {
     return await firstValueFrom(this.http.get<Caja[]>(`${this.url}/saldos-actuales-empleados`));
   }
 
-  async obtenerHistorialArqueos(parametros: {
-    fecha_inicio: string;
-    fecha_fin: string;
+  async obtenerMovimientos(parametros: {
+    fecha_inicio: string | null;
+    fecha_fin: string | null;
     empleado_id: number | null;
   }) {
     return await firstValueFrom(
-      this.http.post<{ arqueos: Caja[]; totales: TotalCaja }>(
-        `${this.url}/historial-arqueos`,
-        parametros,
-      ),
+      this.http.post<{
+        fecha_inicio: string;
+        fecha_fin: string;
+        movimientos: Movimientos[];
+        total_registros: number;
+      }>(`${this.url}/historial-movimientos`, parametros),
+    );
+  }
+
+  async obtenerHistorialArqueos(parametros: {
+    fecha_inicio: string | null;
+    fecha_fin: string | null;
+    empleado_id: number | null;
+  }) {
+    return await firstValueFrom(
+      this.http.post<{
+        fecha_inicio: string;
+        fecha_fin: string;
+        arqueos: Caja[];
+        totales: TotalCaja;
+      }>(`${this.url}/historial-arqueos`, parametros),
     );
   }
 }

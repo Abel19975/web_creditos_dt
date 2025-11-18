@@ -12,6 +12,8 @@ import { FloatLabel } from 'primeng/floatlabel';
 import { DatePicker } from 'primeng/datepicker';
 import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { FormsModule } from '@angular/forms';
+import { UtilidadesFecha } from '../../shared/utils/utils';
+import { FechaUtcService } from '../../shared/utils/fecha-utc-service';
 
 const RANGO_DIAS = 9;
 
@@ -35,6 +37,7 @@ const RANGO_DIAS = 9;
 export default class Creditos {
   private creditoService = inject(CreditoService);
   private historialSvc = inject(CajaService);
+  protected fechaUtcSvc = inject(FechaUtcService);
 
   protected empleadoSeleccionado = signal<Empleado | null>(null);
   private todosLosEmpleados = signal<Empleado[]>([]);
@@ -52,18 +55,10 @@ export default class Creditos {
   protected search = signal('');
   protected estado = signal('');
   protected otorganteId = signal<number | null>(null);
-  protected fechaInicio = signal<Date>(
-    new Date(new Date().setDate(new Date().getDate() - RANGO_DIAS)),
-  );
-  protected fechaFin = signal<Date>(new Date());
+  protected fechaInicio = signal<Date | null>(null);
+  protected fechaFin = signal<Date | null>(null);
+  protected fechaInicioAux = signal<Date | null>(null);
   protected maxDate = signal<Date>(new Date());
-
-  private formatearFecha(fecha: Date): string {
-    const año = fecha.getFullYear();
-    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-    const día = String(fecha.getDate()).padStart(2, '0');
-    return `${año}-${mes}-${día}`;
-  }
 
   protected severity(credito: Credito) {
     if (credito.estado === 'pagado') {
@@ -86,11 +81,15 @@ export default class Creditos {
   }
 
   async ngOnInit() {
+    const hoy = new Date();
+    hoy.setHours(23, 59, 59, 999);
+    this.maxDate.set(hoy);
+
     this.cargarEmpleados();
     await this.cargarCreditos();
   }
 
-  protected onSearch(event: AutoCompleteCompleteEvent) {
+  protected buscarEmpleado(event: AutoCompleteCompleteEvent) {
     const query = event.query.toLowerCase();
     const filtrados = this.todosLosEmpleados().filter((empleado) =>
       empleado.persona.nombre_completo.toLowerCase().includes(query),
@@ -120,33 +119,37 @@ export default class Creditos {
   async cargarCreditos(pagina: number = 1) {
     const inicio = this.fechaInicio();
     const fin = this.fechaFin();
-    const empleadoId = this.empleadoSeleccionado()
-      ? this.empleadoSeleccionado()!.persona_id
-      : undefined;
+    const empleadoId = this.empleadoSeleccionado() ? this.empleadoSeleccionado()!.persona_id : null;
 
-    const response = await this.creditoService.listarCreditos(
+    const res = await this.creditoService.listarCreditos(
       this.estado(),
       empleadoId,
-      this.formatearFecha(inicio),
-      this.formatearFecha(fin),
+      inicio ? UtilidadesFecha.formatearFecha(inicio) : null,
+      fin ? UtilidadesFecha.formatearFecha(fin) : null,
       this.search(),
       pagina,
       this.pagination().per_page,
     );
 
-    this.creditos.set(response.data);
-    this.pagination.set(response.pagination);
+    this.creditos.set(res.data);
+    this.pagination.set(res.pagination);
+
+    const fechaInicio = this.fechaUtcSvc.convertirUtcALocal(res.fecha_inicio);
+    const fechaFin = this.fechaUtcSvc.convertirUtcALocal(res.fecha_fin);
+
+    this.fechaInicio.set(fechaInicio);
+    this.fechaFin.set(fechaFin);
+    if (this.fechaInicioAux()) return;
+    this.fechaInicioAux.set(fechaInicio);
   }
 
   protected resetearFiltros() {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
-    const hace9Dias = new Date(hoy);
-    hace9Dias.setDate(hace9Dias.getDate() - RANGO_DIAS);
-
-    this.fechaInicio.set(hace9Dias);
+    this.fechaInicio.set(this.fechaInicioAux());
     this.fechaFin.set(hoy);
+
     this.empleadoSeleccionado.set(null);
     this.aplicarFiltros();
   }

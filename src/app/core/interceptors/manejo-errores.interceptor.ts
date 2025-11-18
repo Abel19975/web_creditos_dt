@@ -2,26 +2,33 @@ import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { MessageService } from 'primeng/api';
+import { AuthService } from '../../auth/auth-service';
 
 export const errorHandlerInterceptor: HttpInterceptorFn = (req, next) => {
   const messageService = inject(MessageService);
+  const authSvc = inject(AuthService);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       const userMessage = extractErrorMessage(error);
 
-      messageService.add({
-        severity: 'error',
-        summary: 'Ocurrió un error',
-        detail: userMessage,
-        life: 5000,
-      });
+      if (error.status !== 401) {
+        messageService.add({
+          severity: 'error',
+          summary: 'Ocurrió un error',
+          detail: userMessage,
+          life: 5000,
+        });
+      }
+
+      if (error.status === 401 && !req.url.includes('logout')) {
+        authSvc.logout();
+      }
 
       return throwError(() => userMessage);
-    })
+    }),
   );
 };
-
 function extractErrorMessage(error: HttpErrorResponse): string {
   const defaultMessage = 'Ocurrió un error inesperado. Por favor, contacta a soporte.';
 
