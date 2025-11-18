@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { firstValueFrom } from 'rxjs';
-import { Caja } from './caja-interface';
-import { Empleado } from '../../shared/interfaces/empleado';
+import { firstValueFrom, map } from 'rxjs';
+import { Caja, Movimientos, TotalCaja } from './caja-interface';
+import { Empleado } from '../empleados/empleado-interface';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +11,16 @@ import { Empleado } from '../../shared/interfaces/empleado';
 export class CajaService {
   private http = inject(HttpClient);
   private url = `${environment.apiUrl}/caja`;
+
+  async obtenerMovimientos(parametros: {
+    fecha_inicio: string;
+    fecha_fin: string;
+    empleado_id: number | null;
+  }) {
+    return await firstValueFrom(
+      this.http.post<Movimientos[]>(`${this.url}/historial-movimientos`, parametros),
+    );
+  }
 
   async obtenerEmpleados() {
     return await firstValueFrom(
@@ -20,7 +30,11 @@ export class CajaService {
 
   async arquearCaja(empleadoId: number) {
     return await firstValueFrom(
-      this.http.post<{ message: string }>(`${this.url}/arqueo`, { empleado_id: empleadoId }),
+      this.http.post<{ resumen: any }>(`${this.url}/arqueo`, { empleado_id: empleadoId }).pipe(
+        map((res) => {
+          return res.resumen.mensaje;
+        }),
+      ),
     );
   }
 
@@ -34,7 +48,10 @@ export class CajaService {
     empleado_id: number | null;
   }) {
     return await firstValueFrom(
-      this.http.post<Caja[]>(`${this.url}/historial-arqueos`, parametros),
+      this.http.post<{ arqueos: Caja[]; totales: TotalCaja }>(
+        `${this.url}/historial-arqueos`,
+        parametros,
+      ),
     );
   }
 }

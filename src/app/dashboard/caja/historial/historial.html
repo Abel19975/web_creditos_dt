@@ -2,160 +2,6 @@
   <div class="overflow-x-hidden">
     <div class="card">
       <div class="card-header">
-        <h3>Historial arqueos de cajas</h3>
-      </div>
-      <p-table
-        #dt
-        [value]="historial()"
-        [scrollable]="true"
-        [rowHover]="true"
-        [sortOrder]="-1"
-        dataKey="id"
-        size="small"
-        [scrollable]="true"
-        scrollHeight="200px"
-      >
-        <!-- sección -->
-        <ng-template #caption>
-          <div class="flex flex-col md:flex-row gap-2 mb-2">
-            <p-floatlabel variant="on">
-              <p-datepicker
-                [(ngModel)]="fechaInicio"
-                inputId="on_label"
-                showIcon
-                iconDisplay="input"
-                appendTo="body"
-                [maxDate]="maxDate()"
-                size="small"
-                fluid
-              />
-              <label for="on_label">Fecha inicio</label>
-            </p-floatlabel>
-            <p-floatlabel variant="on">
-              <p-datepicker
-                [(ngModel)]="fechaFin"
-                inputId="on_label"
-                showIcon
-                iconDisplay="input"
-                appendTo="body"
-                [maxDate]="maxDate()"
-                size="small"
-                fluid
-              />
-              <label for="on_label">Fecha fin</label>
-            </p-floatlabel>
-            <p-autocomplete
-              [dropdown]="true"
-              [suggestions]="empleados()"
-              (completeMethod)="search($event)"
-              size="small"
-              appendTo="body"
-              optionLabel="persona.nombre_completo"
-              placeholder="Buscar empleado..."
-              [(ngModel)]="empleadoSeleccionado"
-            />
-            <p-button
-              fluid
-              size="small"
-              label="Filtrar"
-              icon="pi pi-search"
-              iconPos="right"
-              (click)="cargarHistorial()"
-            />
-          </div>
-        </ng-template>
-
-        <!-- header -->
-        <ng-template #header>
-          <tr>
-            <th class="dark:bg-slate-800! bg-primary-100!">Código</th>
-            <th class="dark:bg-slate-800! bg-primary-100!">Fecha arqueo</th>
-            <th class="dark:bg-slate-800! bg-primary-100!">Empleado</th>
-            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
-              Saldo anterior
-            </th>
-            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
-              Total recaudado
-            </th>
-            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
-              Microseguros
-            </th>
-            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
-              Total ingresos
-            </th>
-            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
-              Total desembolso
-            </th>
-            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
-              Otros egresos
-            </th>
-            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
-              Total egresos
-            </th>
-            <th
-              style="text-align: right"
-              alignFrozen="right"
-              pFrozenColumn
-              class="dark:bg-slate-800! bg-primary-100!"
-            >
-              Total caja
-            </th>
-          </tr>
-        </ng-template>
-
-        <!-- body -->
-        <ng-template #body let-historial>
-          <tr>
-            <td data-label="Código">
-              {{ historial.id }}
-            </td>
-            <td data-label="Fecha arqueo">
-              {{ historial.fecha_arqueo | date: 'dd/MM/yyyy' }}
-            </td>
-            <td data-label="Empleado">
-              {{ historial.empleado.persona.nombre_completo }}
-            </td>
-            <td data-label="Saldo anterior" style="text-align: right">
-              {{ historial.saldo_anterior | currency }}
-            </td>
-            <td data-label="Total recaudado" style="text-align: right">
-              {{ historial.total_recaudado | currency }}
-            </td>
-            <td data-label="Microseguros" style="text-align: right">
-              {{ historial.total_microseguro | currency }}
-            </td>
-            <td data-label="Total ingresos" style="text-align: right">
-              {{ historial.total_ingresos | currency }}
-            </td>
-            <td data-label="Total desembolso" style="text-align: right">
-              {{ historial.total_desembolso | currency }}
-            </td>
-            <td data-label="Otros egresos" style="text-align: right">
-              {{ historial.total_otros_egresos | currency }}
-            </td>
-            <td data-label="Total egresos" style="text-align: right">
-              {{ historial.total_egresos | currency }}
-            </td>
-            <td
-              data-label="Total caja"
-              alignFrozen="right"
-              pFrozenColumn
-              style="text-align: right"
-              class="dark:bg-slate-800! bg-primary-100!"
-            >
-              {{ historial.total_caja | currency }}
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </div>
-  </div>
-</div>
-<br />
-<div class="grid">
-  <div class="overflow-x-hidden">
-    <div class="card">
-      <div class="card-header">
         <h3>Saldo de cajas actuales</h3>
       </div>
       <p-table
@@ -163,7 +9,6 @@
         [value]="saldoActuales()"
         [scrollable]="true"
         [rowHover]="true"
-        [sortOrder]="-1"
         dataKey="id"
         size="small"
         [scrollable]="true"
@@ -268,7 +113,270 @@
                 size="small"
                 (click)="arquearCaja(historial.empleado)"
                 [severity]="historial.arqueado ? 'warn' : 'success'"
+                [pTooltip]="
+                  historial.arqueado
+                    ? 'Ya se ha registrado el arqueo de esta caja por el día de hoy!'
+                    : ''
+                "
+                tooltipPosition="left"
               />
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
+<br />
+
+<div class="grid">
+  <div class="overflow-x-hidden">
+    <div class="card">
+      <div class="flex flex-col md:flex-row justify-center gap-2 mb-2">
+        <p-floatlabel variant="on">
+          <p-datepicker
+            [(ngModel)]="fechaInicio"
+            inputId="on_label"
+            showIcon
+            iconDisplay="input"
+            appendTo="body"
+            [maxDate]="maxDate()"
+            size="small"
+            dateFormat="dd/mm/yy"
+            fluid
+          />
+          <label for="on_label">Fecha inicio</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on">
+          <p-datepicker
+            [(ngModel)]="fechaFin"
+            inputId="on_label"
+            showIcon
+            iconDisplay="input"
+            appendTo="body"
+            [maxDate]="maxDate()"
+            size="small"
+            dateFormat="dd/mm/yy"
+            fluid
+          />
+          <label for="on_label">Fecha fin</label>
+        </p-floatlabel>
+        <p-autocomplete
+          [dropdown]="true"
+          [suggestions]="empleados()"
+          (completeMethod)="search($event)"
+          size="small"
+          appendTo="body"
+          optionLabel="persona.nombre_completo"
+          placeholder="Buscar empleado..."
+          [(ngModel)]="empleadoSeleccionado"
+        />
+        <p-button
+          fluid
+          size="small"
+          severity="danger"
+          label="Limpiar"
+          (click)="resetearFiltros()"
+        />
+        <p-button
+          fluid
+          size="small"
+          label="Filtrar"
+          icon="pi pi-search"
+          iconPos="right"
+          (click)="cargarDatos()"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+<br />
+
+<div class="grid">
+  <div class="overflow-x-hidden">
+    <div class="card">
+      <div class="card-header">
+        <h3>Historial arqueos de cajas</h3>
+      </div>
+      <p-table
+        #dt
+        [value]="historial()"
+        [scrollable]="true"
+        [rowHover]="true"
+        dataKey="id"
+        size="small"
+        scrollHeight="400px"
+      >
+        <!-- header -->
+        <ng-template #header>
+          <tr>
+            <th class="dark:bg-slate-800! bg-primary-100!">Código</th>
+            <th class="dark:bg-slate-800! bg-primary-100!">Fecha arqueo</th>
+            <th class="dark:bg-slate-800! bg-primary-100!">Empleado</th>
+            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
+              Saldo anterior
+            </th>
+            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
+              Total recaudado
+            </th>
+            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
+              Microseguros
+            </th>
+            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
+              Total ingresos
+            </th>
+            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
+              Total desembolso
+            </th>
+            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
+              Otros egresos
+            </th>
+            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
+              Total egresos
+            </th>
+            <th
+              style="text-align: right"
+              alignFrozen="right"
+              pFrozenColumn
+              class="dark:bg-slate-800! bg-primary-100!"
+            >
+              Total caja
+            </th>
+          </tr>
+        </ng-template>
+
+        <!-- body -->
+        <ng-template #body let-historial>
+          <tr>
+            <td data-label="Código">
+              {{ historial.id }}
+            </td>
+            <td data-label="Fecha arqueo">
+              {{ historial.fecha_arqueo | date: 'dd/MM/yyyy' }}
+            </td>
+            <td data-label="Empleado">
+              {{ historial.empleado.persona.nombre_completo }}
+            </td>
+            <td data-label="Saldo anterior" style="text-align: right">
+              {{ historial.saldo_anterior | currency }}
+            </td>
+            <td data-label="Total recaudado" style="text-align: right">
+              {{ historial.total_recaudado | currency }}
+            </td>
+            <td data-label="Microseguros" style="text-align: right">
+              {{ historial.total_microseguro | currency }}
+            </td>
+            <td data-label="Total ingresos" style="text-align: right">
+              {{ historial.total_ingresos | currency }}
+            </td>
+            <td data-label="Total desembolso" style="text-align: right">
+              {{ historial.total_desembolso | currency }}
+            </td>
+            <td data-label="Otros egresos" style="text-align: right">
+              {{ historial.total_otros_egresos | currency }}
+            </td>
+            <td data-label="Total egresos" style="text-align: right">
+              {{ historial.total_egresos | currency }}
+            </td>
+            <td
+              data-label="Total caja"
+              alignFrozen="right"
+              pFrozenColumn
+              style="text-align: right"
+              class="dark:bg-slate-800! bg-primary-100!"
+            >
+              {{ historial.total_caja | currency }}
+            </td>
+          </tr>
+        </ng-template>
+
+        <!-- footer -->
+        <ng-template #footer>
+          <tr
+            class="bg-primary-50 dark:bg-slate-800 font-bold border-t-2 border-primary-200 dark:border-slate-700"
+          >
+            <td colspan="3" style="text-align: right" class="px-4 py-3">TOTALES</td>
+            <td style="text-align: right" class="px-4 py-3">
+              {{ totalesHistorial()?.saldo_anterior | currency }}
+            </td>
+            <td style="text-align: right" class="px-4 py-3">
+              {{ totalesHistorial()?.total_recaudado | currency }}
+            </td>
+            <td style="text-align: right" class="px-4 py-3">
+              {{ totalesHistorial()?.total_microseguro | currency }}
+            </td>
+            <td style="text-align: right" class="px-4 py-3">
+              {{ totalesHistorial()?.total_ingresos | currency }}
+            </td>
+            <td style="text-align: right" class="px-4 py-3">
+              {{ totalesHistorial()?.total_desembolso | currency }}
+            </td>
+            <td style="text-align: right" class="px-4 py-3">
+              {{ totalesHistorial()?.total_otros_egresos | currency }}
+            </td>
+            <td style="text-align: right" class="px-4 py-3">
+              {{ totalesHistorial()?.total_egresos | currency }}
+            </td>
+            <td
+              style="text-align: right"
+              alignFrozen="right"
+              pFrozenColumn
+              class="dark:bg-slate-800! bg-primary-100! px-4 py-3"
+            >
+              {{ totalesHistorial()?.total_caja | currency }}
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
+<br />
+
+<div class="grid">
+  <div class="overflow-x-hidden">
+    <div class="card">
+      <div class="card-header">
+        <h3>Historial de movimientos</h3>
+      </div>
+      <p-table
+        #dt
+        [value]="movimientos()"
+        [scrollable]="true"
+        [rowHover]="true"
+        dataKey="id"
+        size="small"
+        [scrollable]="true"
+        scrollHeight="500px"
+      >
+        <!-- header -->
+        <ng-template #header>
+          <tr>
+            <th class="dark:bg-slate-800! bg-primary-100!">Código</th>
+            <th class="dark:bg-slate-800! bg-primary-100!">Fecha movimiento</th>
+            <th class="dark:bg-slate-800! bg-primary-100!">Empleado</th>
+            <th class="dark:bg-slate-800! bg-primary-100!">Tipo movimiento</th>
+            <th class="dark:bg-slate-800! bg-primary-100!">Descripción</th>
+          </tr>
+        </ng-template>
+
+        <!-- body -->
+        <ng-template #body let-historial>
+          <tr>
+            <td data-label="Código">
+              {{ historial.id }}
+            </td>
+            <td data-label="Fecha movimiento">
+              {{ historial.created_at | date: 'dd/MM/yyyy' }}
+            </td>
+            <td data-label="Empleado">
+              {{ historial.empleado.persona.nombre_completo }}
+            </td>
+            <td data-label="Tipo movimiento">
+              {{ historial.tipo }}
+            </td>
+            <td data-label="Descripción">
+              {{ historial.descripcion }}
             </td>
           </tr>
         </ng-template>

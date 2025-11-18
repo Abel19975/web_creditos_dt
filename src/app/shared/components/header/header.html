@@ -3,7 +3,10 @@
   <app-toggle-sidebar (toggle)="sidebarSvc.toggleSidebar()" />
 
   <div class="flex items-center p-2 rounded-xl group">
-    <span class="font-medium whitespace-nowrap overflow-hidden text-sm">{{ 'Hola, Abel' }}</span>
+    <i class="pi pi-user p-3"></i>
+    <span class="font-medium whitespace-nowrap overflow-hidden text-sm">{{
+      `${usuario()?.persona?.nombres}`
+    }}</span>
   </div>
 
   <div class="flex items-center">
