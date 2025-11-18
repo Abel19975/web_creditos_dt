@@ -1,1 +1,190 @@
-<p>creditos works!</p>
+<div class="grid">
+  <div class="overflow-x-hidden">
+    <div class="card">
+      <div class="card-header">
+        <h3>Créditos</h3>
+      </div>
+      <div class="flex flex-col md:flex-row justify-center items-center gap-2 mb-2">
+        <p-floatlabel variant="on">
+          <p-datepicker
+            inputId="on_label"
+            showIcon
+            iconDisplay="input"
+            appendTo="body"
+            size="small"
+            dateFormat="dd/mm/yy"
+            fluid
+            [(ngModel)]="fechaInicio"
+          />
+          <label for="on_label">Fecha inicio</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on">
+          <p-datepicker
+            inputId="on_label"
+            showIcon
+            iconDisplay="input"
+            appendTo="body"
+            size="small"
+            dateFormat="dd/mm/yy"
+            fluid
+            [(ngModel)]="fechaFin"
+          />
+          <label for="on_label">Fecha fin</label>
+        </p-floatlabel>
+        <p-autocomplete
+          [dropdown]="true"
+          [suggestions]="empleados()"
+          (completeMethod)="onSearch($event)"
+          size="small"
+          appendTo="body"
+          optionLabel="persona.nombre_completo"
+          placeholder="Buscar por empleado"
+          [(ngModel)]="empleadoSeleccionado"
+        />
+        <p-button
+          fluid
+          size="small"
+          severity="danger"
+          label="Limpiar"
+          (onClick)="resetearFiltros()"
+        />
+        <p-button
+          fluid
+          size="small"
+          label="Filtrar"
+          icon="pi pi-search"
+          iconPos="right"
+          (onClick)="aplicarFiltros()"
+        />
+      </div>
+      <br />
+
+      <p-table
+        #dt
+        [value]="creditos()"
+        [paginator]="true"
+        [rows]="pagination().per_page"
+        [totalRecords]="pagination().total"
+        [first]="(pagination().current_page - 1) * pagination().per_page"
+        [lazy]="true"
+        (onLazyLoad)="onPageChange($event)"
+        [scrollable]="true"
+        [rowHover]="true"
+        [sortOrder]="-1"
+        dataKey="id"
+        size="small"
+      >
+        <!-- header -->
+        <ng-template #header>
+          <tr>
+            <th class="dark:bg-slate-800! bg-primary-100!">Fecha</th>
+            <th class="dark:bg-slate-800! bg-primary-100!">Cliente</th>
+            <th class="dark:bg-slate-800! bg-primary-100!">Empleado</th>
+            <th class="dark:bg-slate-800! bg-primary-100!">Secuencial</th>
+            <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">
+              Valor crédito
+            </th>
+            <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">
+              Tasa interes
+            </th>
+            <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">Total</th>
+            <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">Pagado</th>
+            <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">Saldo</th>
+
+            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: center">
+              Número cuotas
+            </th>
+
+            <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">
+              Valor cuotas
+            </th>
+            <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">
+              Valor microseguro
+            </th>
+
+            <th style="text-align: center" class="dark:bg-slate-800! bg-primary-100!">
+              Cuotas pagadas
+            </th>
+            <th style="text-align: center" class="dark:bg-slate-800! bg-primary-100!">
+              Cuotas vencidas
+            </th>
+            <th style="text-align: center" class="dark:bg-slate-800! bg-primary-100!">Estado</th>
+
+            <th
+              style="text-align: right"
+              alignFrozen="right"
+              pFrozenColumn
+              class="dark:bg-slate-800! bg-primary-100!"
+            >
+              Acciones
+            </th>
+          </tr>
+        </ng-template>
+
+        <!-- body -->
+        <ng-template #body let-credito>
+          <tr>
+            <td data-label="Fecha">
+              {{ credito.fecha_credito | date: 'dd/MM/yyyy' }}
+            </td>
+            <td data-label="Cliente">
+              {{ credito.cliente.persona.nombre_completo }}
+            </td>
+            <td data-label="Empleado">
+              {{ credito.otorgante.nombre_completo }}
+            </td>
+            <td data-label="Secuencial">
+              {{ credito.secuencial }}
+            </td>
+            <td data-label="Valor crédito" style="text-align: right">
+              {{ credito.valor_credito | currency }}
+            </td>
+            <td data-label="Tasa interes" style="text-align: right">{{ credito.tasa_interes }}%</td>
+            <td data-label="Total" style="text-align: right">
+              {{ credito.total | currency }}
+            </td>
+            <td data-label="Total" style="text-align: right">
+              {{ credito.pagado | currency }}
+            </td>
+            <td data-label="Total" style="text-align: right">
+              {{ credito.saldo | currency }}
+            </td>
+            <td data-label="Número cuotas" style="text-align: center">
+              {{ credito.numero_cuotas }}
+            </td>
+
+            <td data-label="Valor cuotas" style="text-align: right">
+              {{ credito.valor_cuotas | currency }}
+            </td>
+            <td data-label="Valor microseguro" style="text-align: right">
+              {{ credito.valor_micro_seguro | currency }}
+            </td>
+
+            <td data-label="Cuotas pagadas" style="text-align: center">
+              {{ credito.cuotas_pagadas }}
+            </td>
+            <td data-label="Cuotas vencidas" style="text-align: center">
+              <p-tag [severity]="severityCuotas(credito)" [value]="credito.cuotas_vencidas" />
+            </td>
+            <td data-label="Estado" style="text-align: center">
+              <p-tag [severity]="severity(credito)" [value]="credito.estado" />
+            </td>
+
+            <td alignFrozen="right" pFrozenColumn>
+              <div class="flex justify-end gap-1">
+                <p-button
+                  pTooltip="Descargar reporte detallado"
+                  tooltipPosition="left"
+                  icon="pi pi-download"
+                  rounded
+                  text
+                  (onClick)="descargarReporteDetallado(credito)"
+                />
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>

@@ -29,6 +29,7 @@ export interface Persona {
   identificacion: string;
   nombres: string;
   apellidos: string;
+  nombre_completo: string;
   celular: string;
   direccion: string;
   created_at: Date;
