@@ -2,7 +2,7 @@
   <div class="overflow-x-hidden">
     <div class="card">
       <div class="card-header">
-        <h3>Saldo de cajas actuales</h3>
+        <h3>Saldo actual en cajas</h3>
       </div>
       <p-table
         #dt
@@ -209,7 +209,7 @@
             <th class="dark:bg-slate-800! bg-primary-100!">Fecha arqueo</th>
             <th class="dark:bg-slate-800! bg-primary-100!">Empleado</th>
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
-              Caja anterior
+              Saldo anterior
             </th>
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">Cobros</th>
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
@@ -248,7 +248,7 @@
             <td data-label="Empleado">
               {{ historial.empleado.persona.nombre_completo }}
             </td>
-            <td data-label="Caja anterior" style="text-align: right">
+            <td data-label="Saldo anterior" style="text-align: right">
               {{ historial.saldo_anterior | currency }}
             </td>
             <td data-label="Cobros" style="text-align: right">

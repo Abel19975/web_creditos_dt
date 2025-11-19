@@ -1,1 +1,52 @@
-<p>principal works!</p>
+<div class="grid grid-cols-12 gap-5 dark:text-black">
+  <div class="col-span-12 lg:col-span-6">
+    <div class="card">
+      <div id="chart">
+        <apx-chart
+          #chart
+          [series]="chartOptions.series!"
+          [chart]="chartOptions.chart!"
+          [xaxis]="chartOptions.xaxis!"
+          [stroke]="chartOptions.stroke!"
+          [dataLabels]="chartOptions.dataLabels!"
+          [yaxis]="chartOptions.yaxis!"
+          [labels]="chartOptions.labels!"
+          [legend]="chartOptions.legend!"
+          [title]="chartOptions.title!"
+          [subtitle]="chartOptions.subtitle!"
+        ></apx-chart>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-span-12 lg:col-span-6">
+    <div class="card">
+      <div id="chartBar">
+        <apx-chart
+          #chartBar
+          [series]="chartOptionsBar.series!"
+          [chart]="chartOptionsBar.chart!"
+          [dataLabels]="chartOptionsBar.dataLabels!"
+          [plotOptions]="chartOptionsBar.plotOptions!"
+          [yaxis]="chartOptionsBar.yaxis!"
+          [xaxis]="chartOptionsBar.xaxis!"
+          [fill]="chartOptionsBar.fill!"
+          [title]="chartOptionsBar.title!"
+        ></apx-chart>
+      </div>
+    </div>
+  </div>
+  <div class="col-span-12 lg:col-span-6">
+    <div class="card">
+      <div id="chartSerie">
+        <apx-chart
+          #chartSerie
+          [series]="chartOptionsSerie.series!"
+          [chart]="chartOptionsSerie.chart!"
+          [labels]="chartOptionsSerie.labels!"
+          [responsive]="chartOptionsSerie.responsive!"
+        ></apx-chart>
+      </div>
+    </div>
+  </div>
+</div>
