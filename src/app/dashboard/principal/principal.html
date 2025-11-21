@@ -1,52 +1,243 @@
-<div class="grid grid-cols-12 gap-5 dark:text-black">
+<div class="grid grid-cols-12 gap-5">
+  <!-- Filtros Período 1 -->
   <div class="col-span-12 lg:col-span-6">
     <div class="card">
-      <div id="chart">
-        <apx-chart
-          #chart
-          [series]="chartOptions.series!"
-          [chart]="chartOptions.chart!"
-          [xaxis]="chartOptions.xaxis!"
-          [stroke]="chartOptions.stroke!"
-          [dataLabels]="chartOptions.dataLabels!"
-          [yaxis]="chartOptions.yaxis!"
-          [labels]="chartOptions.labels!"
-          [legend]="chartOptions.legend!"
-          [title]="chartOptions.title!"
-          [subtitle]="chartOptions.subtitle!"
-        ></apx-chart>
+      <div class="card-header">
+        <h3>Período 1</h3>
+      </div>
+      <div class="grid grid-cols-12 gap-3">
+        <div class="col-span-12 sm:col-span-6">
+          <p-floatlabel variant="on">
+            <p-datepicker
+              [(ngModel)]="fechaInicio1"
+              inputId="fecha_inicio1_picker"
+              showIcon
+              iconDisplay="input"
+              appendTo="body"
+              size="small"
+              dateFormat="dd/mm/yy"
+              fluid
+            />
+            <label for="fecha_inicio1_picker">Fecha inicio</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="col-span-12 sm:col-span-6">
+          <p-floatlabel variant="on">
+            <p-datepicker
+              [(ngModel)]="fechaFin1"
+              inputId="fecha_fin1_picker"
+              showIcon
+              iconDisplay="input"
+              appendTo="body"
+              size="small"
+              dateFormat="dd/mm/yy"
+              fluid
+            />
+            <label for="fecha_fin1_picker">Fecha fin</label>
+          </p-floatlabel>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- Filtros Período 2 -->
   <div class="col-span-12 lg:col-span-6">
     <div class="card">
-      <div id="chartBar">
-        <apx-chart
-          #chartBar
-          [series]="chartOptionsBar.series!"
-          [chart]="chartOptionsBar.chart!"
-          [dataLabels]="chartOptionsBar.dataLabels!"
-          [plotOptions]="chartOptionsBar.plotOptions!"
-          [yaxis]="chartOptionsBar.yaxis!"
-          [xaxis]="chartOptionsBar.xaxis!"
-          [fill]="chartOptionsBar.fill!"
-          [title]="chartOptionsBar.title!"
-        ></apx-chart>
+      <div class="card-header">
+        <h3>Período 2</h3>
+      </div>
+      <div class="grid grid-cols-12 gap-3">
+        <div class="col-span-12 sm:col-span-6">
+          <p-floatlabel variant="on">
+            <p-datepicker
+              [(ngModel)]="fechaInicio2"
+              inputId="fecha_inicio2_picker"
+              showIcon
+              iconDisplay="input"
+              appendTo="body"
+              size="small"
+              dateFormat="dd/mm/yy"
+              fluid
+            />
+            <label for="fecha_inicio2_picker">Fecha inicio</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="col-span-12 sm:col-span-6">
+          <p-floatlabel variant="on">
+            <p-datepicker
+              [(ngModel)]="fechaFin2"
+              inputId="fecha_fin2_picker"
+              showIcon
+              iconDisplay="input"
+              appendTo="body"
+              size="small"
+              dateFormat="dd/mm/yy"
+              fluid
+            />
+            <label for="fecha_fin2_picker">Fecha fin</label>
+          </p-floatlabel>
+        </div>
       </div>
     </div>
   </div>
-  <div class="col-span-12 lg:col-span-6">
-    <div class="card">
-      <div id="chartSerie">
-        <apx-chart
-          #chartSerie
-          [series]="chartOptionsSerie.series!"
-          [chart]="chartOptionsSerie.chart!"
-          [labels]="chartOptionsSerie.labels!"
-          [responsive]="chartOptionsSerie.responsive!"
-        ></apx-chart>
+
+  <!-- Botón Comparar -->
+  <div class="col-span-12">
+    <button
+      (click)="obtenerCarteraComparativa()"
+      class="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-semibold"
+    >
+      Comparar Carteras
+    </button>
+  </div>
+
+  <!-- Tabla Período 1 -->
+  @if (carteraComparativa()) {
+    <div class="col-span-12 lg:col-span-6">
+      <div class="card">
+        <div class="card-header">
+          <h3>Cartera Período 1</h3>
+          <p class="text-xs text-gray-500 mt-1">
+            {{ carteraComparativa()!.periodo1.fechaInicio | date: 'dd/MM/yyyy' }} -
+            {{ carteraComparativa()!.periodo1.fechaFin | date: 'dd/MM/yyyy' }}
+          </p>
+        </div>
+        <p-table
+          [value]="carteraComparativa()!.periodo1.cartera"
+          [scrollable]="true"
+          [rowHover]="true"
+          dataKey="otorgante_id"
+          size="small"
+          scrollHeight="350px"
+        >
+          <ng-template #header>
+            <tr>
+              <th class="bg-primary-100">Empleado</th>
+              <th class="bg-primary-100 text-right">Prestado</th>
+              <th class="bg-primary-100 text-right">Cobrado</th>
+              <th class="bg-primary-100 text-right">Pendiente</th>
+              <th class="bg-primary-100 text-right">%</th>
+            </tr>
+          </ng-template>
+
+          <ng-template #body let-row>
+            <tr>
+              <td class="font-semibold">{{ row.otorgante.nombres }}</td>
+              <td class="text-right">${{ row.total_prestado }}</td>
+              <td class="text-right text-green-600 font-semibold">${{ row.total_cobrado }}</td>
+              <td class="text-right text-red-600 font-semibold">${{ row.total_pendiente }}</td>
+              <td class="text-right">{{ row.porcentaje_cobrado }}%</td>
+            </tr>
+          </ng-template>
+
+          <ng-template #footer>
+            <tr class="bg-primary-50 font-bold border-t-2">
+              <td>TOTALES</td>
+              <td class="text-right">
+                ${{ carteraComparativa()!.periodo1.total?.total_prestado }}
+              </td>
+              <td class="text-right text-green-600">
+                ${{ carteraComparativa()!.periodo1.total?.total_cobrado }}
+              </td>
+              <td class="text-right text-red-600">
+                ${{ carteraComparativa()!.periodo1.total?.total_pendiente }}
+              </td>
+              <td class="text-right">
+                {{ carteraComparativa()!.periodo1.total?.porcentaje_cobrado }}%
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
       </div>
     </div>
-  </div>
+
+    <!-- Tabla Período 2 -->
+    <div class="col-span-12 lg:col-span-6">
+      <div class="card">
+        <div class="card-header">
+          <h3>Cartera Período 2</h3>
+          <p class="text-xs text-gray-500 mt-1">
+            {{ carteraComparativa()!.periodo2.fechaInicio | date: 'dd/MM/yyyy' }} -
+            {{ carteraComparativa()!.periodo2.fechaFin | date: 'dd/MM/yyyy' }}
+          </p>
+        </div>
+        <p-table
+          [value]="carteraComparativa()!.periodo2.cartera"
+          [scrollable]="true"
+          [rowHover]="true"
+          dataKey="otorgante_id"
+          size="small"
+          scrollHeight="350px"
+        >
+          <ng-template #header>
+            <tr>
+              <th class="bg-primary-100">Empleado</th>
+              <th class="bg-primary-100 text-right">Prestado</th>
+              <th class="bg-primary-100 text-right">Cobrado</th>
+              <th class="bg-primary-100 text-right">Pendiente</th>
+              <th class="bg-primary-100 text-right">%</th>
+            </tr>
+          </ng-template>
+
+          <ng-template #body let-row>
+            <tr>
+              <td class="font-semibold">{{ row.otorgante.nombres }}</td>
+              <td class="text-right">${{ row.total_prestado }}</td>
+              <td class="text-right text-green-600 font-semibold">${{ row.total_cobrado }}</td>
+              <td class="text-right text-red-600 font-semibold">${{ row.total_pendiente }}</td>
+              <td class="text-right">{{ row.porcentaje_cobrado }}%</td>
+            </tr>
+          </ng-template>
+
+          <ng-template #footer>
+            <tr class="bg-primary-50 font-bold border-t-2">
+              <td>TOTALES</td>
+              <td class="text-right">
+                ${{ carteraComparativa()!.periodo2.total?.total_prestado }}
+              </td>
+              <td class="text-right text-green-600">
+                ${{ carteraComparativa()!.periodo2.total?.total_cobrado }}
+              </td>
+              <td class="text-right text-red-600">
+                ${{ carteraComparativa()!.periodo2.total?.total_pendiente }}
+              </td>
+              <td class="text-right">
+                {{ carteraComparativa()!.periodo2.total?.porcentaje_cobrado }}%
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+
+    <!-- Gráfico Comparativo -->
+    <div class="col-span-12">
+      <div class="card">
+        @if (chartOptionsBar()) {
+          <div style="width: 100%; height: 450px">
+            <apx-chart
+              [colors]="chartOptionsBar()!.colors!"
+              [series]="chartOptionsBar()!.series!"
+              [chart]="chartOptionsBar()!.chart!"
+              [dataLabels]="chartOptionsBar()!.dataLabels!"
+              [plotOptions]="chartOptionsBar()!.plotOptions!"
+              [yaxis]="chartOptionsBar()!.yaxis!"
+              [xaxis]="chartOptionsBar()!.xaxis!"
+              [fill]="chartOptionsBar()!.fill!"
+              [title]="chartOptionsBar()!.title!"
+              [stroke]="chartOptionsBar()!.stroke!"
+              [legend]="chartOptionsBar()!.legend!"
+              [tooltip]="chartOptionsBar()!.tooltip!"
+            ></apx-chart>
+          </div>
+        } @else {
+          <div class="text-center py-16 text-gray-500">
+            Selecciona dos períodos y haz clic en "Comparar Carteras"
+          </div>
+        }
+      </div>
+    </div>
+  }
 </div>

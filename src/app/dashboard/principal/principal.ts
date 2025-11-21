@@ -1,41 +1,31 @@
-import { Component, computed, effect, inject, ViewChild } from '@angular/core';
-
+import { Component, computed, effect, inject, signal, ViewChild, OnInit } from '@angular/core';
 import {
   ChartComponent,
-  ApexAxisChartSeries,
   ApexChart,
+  ApexAxisChartSeries,
   ApexXAxis,
   ApexDataLabels,
   ApexStroke,
   ApexYAxis,
   ApexTitleSubtitle,
   ApexLegend,
+  ApexPlotOptions,
+  ApexFill,
 } from 'ng-apexcharts';
-
-import { series } from './data';
+import { TableModule } from 'primeng/table';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { DatePickerModule } from 'primeng/datepicker';
 import { ThemeService } from '../../shared/services/theme.service';
-
-export type ChartOptions = {
-  series: ApexAxisChartSeries;
-  chart: ApexChart;
-  xaxis: ApexXAxis;
-  stroke: ApexStroke;
-  dataLabels: ApexDataLabels;
-  yaxis: ApexYAxis;
-  title: ApexTitleSubtitle;
-  labels: string[];
-  legend: ApexLegend;
-  subtitle: ApexTitleSubtitle;
-};
-
-export type ChartOptionsSeries = {
-  series: ApexNonAxisChartSeries;
-  chart: ApexChart;
-  responsive: ApexResponsive[];
-  labels: any;
-};
+import { CajaService } from '../caja/caja-service';
+import { Empleado } from '../empleados/empleado-interface';
+import { UtilidadesFecha } from '../../shared/utils/utils';
+import { Cartera, TotalGeneral } from '../caja/caja-interface';
+import { FechaUtcService } from '../../shared/utils/fecha-utc-service';
 
 export type ChartOptionsBar = {
+  colors: string[];
   series: ApexAxisChartSeries;
   chart: ApexChart;
   dataLabels: ApexDataLabels;
@@ -43,237 +33,246 @@ export type ChartOptionsBar = {
   yaxis: ApexYAxis;
   xaxis: ApexXAxis;
   fill: ApexFill;
+  stroke: ApexStroke;
   title: ApexTitleSubtitle;
+  legend: ApexLegend;
+  tooltip?: any;
 };
+
+interface CarteraComparativa {
+  periodo1: {
+    fechaInicio: Date;
+    fechaFin: Date;
+    cartera: Cartera[];
+    total: TotalGeneral | null;
+  };
+  periodo2: {
+    fechaInicio: Date;
+    fechaFin: Date;
+    cartera: Cartera[];
+    total: TotalGeneral | null;
+  };
+}
 
 @Component({
   selector: 'app-principal',
-  imports: [ChartComponent],
+  standalone: true,
+  imports: [
+    ChartComponent,
+    TableModule,
+    CommonModule,
+    FormsModule,
+    FloatLabelModule,
+    DatePickerModule,
+  ],
   templateUrl: './principal.html',
   styleUrl: './principal.css',
 })
 export default class Principal {
-  @ViewChild('chart') chart!: ChartComponent;
-  public chartOptions!: Partial<ChartOptions>;
-
-  @ViewChild('chartSerie') chartSerie!: ChartComponent;
-  public chartOptionsSerie!: Partial<ChartOptionsSeries>;
-
   @ViewChild('chartBar') chartBar!: ChartComponent;
-  public chartOptionsBar!: Partial<ChartOptionsBar>;
 
   private themeSvc = inject(ThemeService);
+  private cajaSvc = inject(CajaService);
+  protected fechaUtcSvc = inject(FechaUtcService);
 
-  themeColor = computed(() => (this.themeSvc.isDarkMode() ? '#fff' : '#000'));
+  protected isDarkMode = this.themeSvc.isDarkMode;
+  protected themeColor = computed(() => (this.themeSvc.isDarkMode() ? '#fff' : '#000'));
+
+  protected fechaInicio1 = signal<Date | null>(null);
+  protected fechaFin1 = signal<Date | null>(null);
+  protected fechaInicio2 = signal<Date | null>(null);
+  protected fechaFin2 = signal<Date | null>(null);
+  protected maxDate = signal<Date>(new Date());
+
+  protected carteraComparativa = signal<CarteraComparativa | null>(null);
+  protected chartOptionsBar = signal<Partial<ChartOptionsBar> | null>(null);
 
   constructor() {
+    // Efecto para actualizar gráfico cuando cambia el tema
     effect(() => {
-      const color = this.themeColor();
-      if (color) {
-        this.chartOptions = {
-          series: [
-            {
-              name: 'STOCK ABC',
-              data: series.monthDataSeries1.prices,
-            },
-          ],
-          chart: {
-            type: 'area',
-            height: 350,
-            zoom: {
-              enabled: false,
-            },
-            toolbar: {
-              show: false,
-            },
-          },
-          dataLabels: {
-            enabled: false,
-          },
-          stroke: {
-            curve: 'straight',
-          },
-
-          title: {
-            text: 'Fundamental Analysis of Stocks',
-            align: 'left',
-            style: {
-              color: this.themeColor(),
-            },
-          },
-          subtitle: {
-            style: {
-              color: this.themeColor(),
-            },
-            text: 'Price Movements',
-            align: 'left',
-          },
-          labels: series.monthDataSeries1.dates,
-          xaxis: {
-            type: 'datetime',
-            labels: {
-              style: {
-                colors: this.themeColor(),
-              },
-            },
-          },
-          yaxis: {
-            opposite: true,
-            labels: {
-              style: {
-                colors: this.themeColor(),
-              },
-            },
-          },
-          legend: {
-            horizontalAlign: 'left',
-            labels: {
-              colors: this.themeColor(),
-            },
-          },
-        };
-
-        this.chartOptionsBar = {
-          series: [
-            {
-              name: 'Inflation',
-              data: [2.3, 3.1, 4.0, 10.1, 4.0, 3.6, 3.2, 2.3, 1.4, 0.8, 0.5, 0.2],
-            },
-          ],
-          chart: {
-            height: 350,
-            type: 'bar',
-            toolbar: {
-              show: false,
-            },
-          },
-          plotOptions: {
-            bar: {
-              dataLabels: {
-                position: 'top', // top, center, bottom
-              },
-            },
-          },
-          dataLabels: {
-            enabled: true,
-            formatter: function (val) {
-              return val + '%';
-            },
-            offsetY: -20,
-            style: {
-              fontSize: '12px',
-              colors: [this.themeColor()],
-            },
-          },
-
-          xaxis: {
-            categories: [
-              'Jan',
-              'Feb',
-              'Mar',
-              'Apr',
-              'May',
-              'Jun',
-              'Jul',
-              'Aug',
-              'Sep',
-              'Oct',
-              'Nov',
-              'Dec',
-            ],
-            position: 'top',
-            labels: {
-              offsetY: -18,
-              style: {
-                colors: this.themeColor(),
-              },
-            },
-            axisBorder: {
-              show: false,
-            },
-            axisTicks: {
-              show: false,
-            },
-            crosshairs: {
-              fill: {
-                type: 'gradient',
-                gradient: {
-                  colorFrom: '#D8E3F0',
-                  colorTo: '#BED1E6',
-                  stops: [0, 100],
-                  opacityFrom: 0.4,
-                  opacityTo: 0.5,
-                },
-              },
-            },
-            tooltip: {
-              enabled: true,
-              offsetY: -35,
-            },
-          },
-          fill: {
-            type: 'gradient',
-            gradient: {
-              shade: 'light',
-              type: 'horizontal',
-              shadeIntensity: 0.25,
-              gradientToColors: undefined,
-              inverseColors: true,
-              opacityFrom: 1,
-              opacityTo: 1,
-              stops: [50, 0, 100, 100],
-            },
-          },
-          yaxis: {
-            axisBorder: {
-              show: false,
-            },
-            axisTicks: {
-              show: false,
-            },
-            labels: {
-              show: false,
-              formatter: function (val) {
-                return val + '%';
-              },
-            },
-          },
-          title: {
-            text: 'Monthly Inflation in Argentina, 2002',
-            floating: false,
-            offsetY: 330,
-            align: 'center',
-            style: {
-              color: this.themeColor(),
-            },
-          },
-        };
-
-        this.chartOptionsSerie = {
-          series: [44, 55, 13, 43, 22],
-          chart: {
-            width: 380,
-            type: 'pie',
-            toolbar: {
-              show: false,
-            },
-          },
-          labels: ['Team A', 'Team B', 'Team C', 'Team D', 'Team E'],
-          responsive: [
-            {
-              breakpoint: 480,
-              options: {
-                chart: {
-                  width: 200,
-                },
-                legend: {
-                  position: 'bottom',
-                },
-              },
-            },
-          ],
-        };
+      if (this.carteraComparativa()) {
+        this.actualizarGrafico();
       }
     });
+  }
+  protected async obtenerCarteraComparativa() {
+    const inicio1 = this.fechaInicio1();
+    const fin1 = this.fechaFin1();
+    const inicio2 = this.fechaInicio2();
+    const fin2 = this.fechaFin2();
+
+    try {
+      // Obtener datos del primer período
+      const res1 = await this.cajaSvc.obtenerCartera({
+        fecha_inicio: inicio1 ? UtilidadesFecha.formatearFecha(inicio1) : null,
+        fecha_fin: fin1 ? UtilidadesFecha.formatearFecha(fin1) : null,
+        otorgante_id: null,
+      });
+
+      // Obtener datos del segundo período
+      const res2 = await this.cajaSvc.obtenerCartera({
+        fecha_inicio: inicio2 ? UtilidadesFecha.formatearFecha(inicio2) : null,
+        fecha_fin: fin2 ? UtilidadesFecha.formatearFecha(fin2) : null,
+        otorgante_id: null,
+      });
+
+      const fechaInicio1Conv = this.fechaUtcSvc.convertirUtcALocal(res1.fecha_inicio);
+      const fechaFin1Conv = this.fechaUtcSvc.convertirUtcALocal(res1.fecha_fin);
+      const fechaInicio2Conv = this.fechaUtcSvc.convertirUtcALocal(res2.fecha_inicio);
+      const fechaFin2Conv = this.fechaUtcSvc.convertirUtcALocal(res2.fecha_fin);
+      this.fechaInicio1.set(fechaInicio1Conv);
+      this.fechaInicio2.set(fechaInicio2Conv);
+      this.fechaFin1.set(fechaFin1Conv);
+      this.fechaFin2.set(fechaFin1Conv);
+
+      this.carteraComparativa.set({
+        periodo1: {
+          fechaInicio: fechaInicio1Conv,
+          fechaFin: fechaFin1Conv,
+          cartera: res1.cartera,
+          total: res1.total_general,
+        },
+        periodo2: {
+          fechaInicio: fechaInicio2Conv,
+          fechaFin: fechaFin2Conv,
+          cartera: res2.cartera,
+          total: res2.total_general,
+        },
+      });
+
+      this.actualizarGrafico();
+    } catch (error) {
+      console.error('Error al obtener cartera comparativa:', error);
+    }
+  }
+
+  private actualizarGrafico() {
+    const comp = this.carteraComparativa();
+
+    if (!comp || comp.periodo1.cartera.length === 0 || comp.periodo2.cartera.length === 0) return;
+
+    // Obtener todos los empleados únicos
+    const empleados = new Map<number, string>();
+    comp.periodo1.cartera.forEach((c) => empleados.set(c.otorgante_id, c.otorgante.nombres));
+    comp.periodo2.cartera.forEach((c) => empleados.set(c.otorgante_id, c.otorgante.nombres));
+
+    const nombres = Array.from(empleados.values());
+    const empleadoIds = Array.from(empleados.keys());
+
+    // Crear mapas para búsqueda rápida
+    const map1 = new Map(comp.periodo1.cartera.map((c) => [c.otorgante_id, c]));
+    const map2 = new Map(comp.periodo2.cartera.map((c) => [c.otorgante_id, c]));
+
+    // Datos para ambos períodos (obteniendo directamente los campos)
+    const prestado1 = empleadoIds.map((id) => parseFloat(map1.get(id)?.total_prestado || '0'));
+    const cobrado1 = empleadoIds.map((id) => parseFloat(map1.get(id)?.total_cobrado || '0'));
+    const pendiente1 = empleadoIds.map((id) => parseFloat(map1.get(id)?.total_pendiente || '0'));
+
+    const prestado2 = empleadoIds.map((id) => parseFloat(map2.get(id)?.total_prestado || '0'));
+    const cobrado2 = empleadoIds.map((id) => parseFloat(map2.get(id)?.total_cobrado || '0'));
+    const pendiente2 = empleadoIds.map((id) => parseFloat(map2.get(id)?.total_pendiente || '0'));
+
+    const opciones: Partial<ChartOptionsBar> = {
+      colors: ['#2563eb', '#60a5fa', '#22c55e', '#dc2626', '#f87171', '#fbbf24'],
+      series: [
+        {
+          name: `Prestado (Período 1)`,
+          data: prestado1,
+        },
+        {
+          name: `Cobrado (Período 1)`,
+          data: cobrado1,
+        },
+        {
+          name: `Pendiente (Período 1)`,
+          data: pendiente1,
+        },
+        {
+          name: `Prestado (Período 2)`,
+          data: prestado2,
+        },
+        {
+          name: `Cobrado (Período 2)`,
+          data: cobrado2,
+        },
+        {
+          name: `Pendiente (Período 2)`,
+          data: pendiente2,
+        },
+      ],
+      chart: {
+        height: 450,
+        type: 'bar',
+        toolbar: {
+          show: false,
+        },
+        background: this.isDarkMode() ? '#0f172a' : '#fff',
+      },
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          columnWidth: '55%',
+          borderRadius: 4,
+        },
+      },
+      dataLabels: {
+        enabled: false,
+      },
+      stroke: {
+        show: true,
+        width: 2,
+        colors: ['transparent'],
+      },
+      xaxis: {
+        categories: nombres,
+        labels: {
+          style: {
+            colors: this.themeColor(),
+            fontSize: '12px',
+          },
+        },
+      },
+      yaxis: {
+        title: {
+          text: 'Monto ($)',
+          style: {
+            color: this.themeColor(),
+          },
+        },
+        labels: {
+          style: {
+            colors: this.themeColor(),
+          },
+        },
+      },
+      fill: {
+        type: 'gradient',
+        opacity: 1,
+      },
+      title: {
+        text: 'Comparativa de Cartera entre Períodos',
+        style: {
+          color: this.themeColor(),
+          fontSize: '16px',
+        },
+      },
+      legend: {
+        labels: {
+          colors: this.themeColor(),
+        },
+      },
+      tooltip: {
+        theme: this.isDarkMode() ? 'dark' : 'light',
+        style: {
+          fontSize: '12px',
+        },
+      },
+    };
+
+    this.chartOptionsBar.set(opciones);
+  }
+
+  protected parseFloat(value: string): number {
+    return parseFloat(value);
   }
 }

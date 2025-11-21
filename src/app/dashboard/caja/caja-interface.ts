@@ -45,3 +45,40 @@ export interface Movimientos {
   updated_at: string;
   empleado: Empleado;
 }
+
+export interface CarteraResponse {
+  fecha_inicio: string;
+  fecha_fin: string;
+  cartera: Cartera[];
+  total_general: TotalGeneral;
+}
+
+export interface Cartera {
+  otorgante_id: number;
+  otorgante: Otorgante;
+  total_prestado: string;
+  total_cobrado: string;
+  total_pendiente: string;
+  porcentaje_cobrado: string;
+  cantidad_creditos: number;
+}
+
+export interface Otorgante {
+  id: number;
+  identificacion: string;
+  nombres: string;
+  apellidos: string;
+  celular: string;
+  direccion: string;
+  created_at: Date;
+  updated_at: Date;
+  nombre_completo: string;
+}
+
+export interface TotalGeneral {
+  total_prestado: string;
+  total_cobrado: string;
+  total_pendiente: string;
+  porcentaje_cobrado: string;
+  cantidad_creditos_total: number;
+}

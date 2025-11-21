@@ -5,7 +5,14 @@ import { CajaService } from '../caja-service';
 import { Caja, Movimientos, TotalCaja } from '../caja-interface';
 import { ButtonModule } from 'primeng/button';
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { TextareaModule } from 'primeng/textarea';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocomplete';
 import { Empleado } from '../../empleados/empleado-interface';
@@ -14,6 +21,10 @@ import { AlertService } from '../../../shared/services/alert.service';
 import { Tooltip } from 'primeng/tooltip';
 import { UtilidadesFecha } from '../../../shared/utils/utils';
 import { FechaUtcService } from '../../../shared/utils/fecha-utc-service';
+import { Message } from 'primeng/message';
+import { Dialog } from 'primeng/dialog';
+import { UtilsService } from '../../../shared/services/utils-service';
+import { InputNumber } from 'primeng/inputnumber';
 
 @Component({
   selector: 'app-historial',
@@ -27,6 +38,11 @@ import { FechaUtcService } from '../../../shared/utils/fecha-utc-service';
     AutoCompleteModule,
     DatePicker,
     Tooltip,
+    Message,
+    Dialog,
+    TextareaModule,
+    ReactiveFormsModule,
+    InputNumber,
   ],
   templateUrl: './historial.html',
   styleUrl: './historial.css',
@@ -35,6 +51,7 @@ export default class Historial implements OnInit {
   private historialSvc = inject(CajaService);
   protected alerta = inject(AlertService);
   protected fechaUtcSvc = inject(FechaUtcService);
+  protected utilSvc = inject(UtilsService);
 
   protected historial = signal<Caja[]>([]);
   protected totalesHistorial = signal<TotalCaja | null>(null);
@@ -50,6 +67,44 @@ export default class Historial implements OnInit {
   protected fechaFin = signal<Date | null>(null);
   protected fechaInicioAux = signal<Date | null>(null);
   protected maxDate = signal<Date>(new Date());
+  protected modal = signal<boolean>(false);
+
+  protected form = new FormGroup({
+    empleado_id: new FormControl(null, Validators.required),
+    monto: new FormControl(null, Validators.required),
+    descripcion: new FormControl(null, Validators.required),
+  });
+  getControl(nameCtrl: string) {
+    return this.form.get(nameCtrl) as FormControl;
+  }
+
+  protected esInvalido(name: string) {
+    const control = this.getControl(name);
+    return control.invalid && control.touched;
+  }
+  protected abrirModalFormularioEgreso() {
+    this.modal.set(true);
+  }
+  protected cerrarModalFormularioEgreso() {
+    this.modal.set(false);
+    this.form.reset();
+  }
+
+  // REGISTRAR EGRESO
+  async registrarEgreso() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    const res = await this.historialSvc.registrarEgreso({
+      empleado_id: this.getControl('empleado_id').value,
+      monto: this.getControl('monto').value,
+      descripcion: this.getControl('descripcion').value,
+    });
+    this.alerta.exito('Éxito', res.message);
+    this.cerrarModalFormularioEgreso();
+    this.cargarDatos();
+  }
 
   // OBTENER SALDOS ACTUALES DE TODOS LOS EMPLEADOS
   async obtenerSaldosActualesEmpleados() {
