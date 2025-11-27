@@ -18,7 +18,7 @@ import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocompl
 import { Empleado } from '../../empleados/empleado-interface';
 import { DatePicker } from 'primeng/datepicker';
 import { AlertService } from '../../../shared/services/alert.service';
-import { Tooltip } from 'primeng/tooltip';
+import { Tooltip, TooltipModule } from 'primeng/tooltip';
 import { UtilidadesFecha } from '../../../shared/utils/utils';
 import { FechaUtcService } from '../../../shared/utils/fecha-utc-service';
 import { Message } from 'primeng/message';
@@ -43,6 +43,7 @@ import { InputNumber } from 'primeng/inputnumber';
     TextareaModule,
     ReactiveFormsModule,
     InputNumber,
+    TooltipModule,
   ],
   templateUrl: './historial.html',
   styleUrl: './historial.css',

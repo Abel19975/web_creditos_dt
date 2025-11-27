@@ -4,12 +4,13 @@ import { firstValueFrom, tap } from 'rxjs';
 import { AuthStore } from './auth-store';
 import { Usuario } from './auth-interface';
 import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8000/api';
+  private apiUrl = `${environment.apiUrl}`;
   private http = inject(HttpClient);
   private auth = inject(AuthStore);
   private router = inject(Router);
@@ -17,14 +18,22 @@ export class AuthService {
   async login(payload: { username: string; password: string }) {
     await firstValueFrom(
       this.http
-        .post<{ message: string; user: Usuario }>(`${this.apiUrl}/login`, payload)
-        .pipe(tap((res) => this.auth.guardarUsuario(res.user))),
+        .post<{ message: string; user: Usuario; token: string }>(`${this.apiUrl}/login`, payload)
+        .pipe(
+          tap((res) => {
+            this.auth.guardarUsuario(res.user);
+            this.auth.guardarToken(res.token);
+          }),
+        ),
     );
   }
 
   async logout() {
-    this.auth.clear();
-    this.router.navigate(['/auth/inicio-sesion'], { replaceUrl: true });
-    await firstValueFrom(this.http.post(`${this.apiUrl}/logout`, {}));
+    try {
+      await firstValueFrom(this.http.post(`${this.apiUrl}/logout`, {}));
+    } finally {
+      this.auth.clear();
+      this.router.navigate(['/auth/inicio-sesion'], { replaceUrl: true });
+    }
   }
 }

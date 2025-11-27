@@ -2,7 +2,6 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { Empleado } from './empleado-interface';
 import { EmpleadoService } from './empleado-service';
 import { TableModule } from 'primeng/table';
-import { CurrencyPipe } from '@angular/common';
 import { Button } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { Dialog } from 'primeng/dialog';
@@ -11,8 +10,6 @@ import { FloatLabel } from 'primeng/floatlabel';
 import { Message } from 'primeng/message';
 import { InputText } from 'primeng/inputtext';
 import { InputNumber } from 'primeng/inputnumber';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
 import { AlertService } from '../../shared/services/alert.service';
 import { UtilsService } from '../../shared/services/utils-service';
 
@@ -20,7 +17,6 @@ import { UtilsService } from '../../shared/services/utils-service';
   selector: 'app-empleados',
   imports: [
     TableModule,
-    CurrencyPipe,
     Button,
     TooltipModule,
     Dialog,

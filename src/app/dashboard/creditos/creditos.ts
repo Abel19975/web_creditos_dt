@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { CreditoService } from './credito-service';
-import { Credito } from './credito-interface';
+import { Credito, TipoCredito, TIPOS_CREDITO_VALUES } from './credito-interface';
 import { TableModule } from 'primeng/table';
 import { Button } from 'primeng/button';
 import { CurrencyPipe, DatePipe } from '@angular/common';
@@ -14,8 +14,7 @@ import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { FormsModule } from '@angular/forms';
 import { UtilidadesFecha } from '../../shared/utils/utils';
 import { FechaUtcService } from '../../shared/utils/fecha-utc-service';
-
-const RANGO_DIAS = 9;
+import { Select } from 'primeng/select';
 
 @Component({
   selector: 'app-creditos',
@@ -30,6 +29,8 @@ const RANGO_DIAS = 9;
     DatePicker,
     AutoComplete,
     FormsModule,
+    TooltipModule,
+    Select,
   ],
   templateUrl: './creditos.html',
   styleUrl: './creditos.css',
@@ -53,12 +54,36 @@ export default class Creditos {
   });
 
   protected search = signal('');
-  protected estado = signal('');
+  protected estado = signal<string | null | boolean>(null);
   protected otorganteId = signal<number | null>(null);
   protected fechaInicio = signal<Date | null>(null);
   protected fechaFin = signal<Date | null>(null);
   protected fechaInicioAux = signal<Date | null>(null);
-  protected maxDate = signal<Date>(new Date());
+
+  protected estadoCreditos = signal([
+    {
+      nombre: 'Renovados por inactivos',
+      valor: true,
+    },
+    {
+      nombre: 'Pagados',
+      valor: 'pagado',
+    },
+    {
+      nombre: 'Vigentes',
+      valor: 'vigente',
+    },
+    {
+      nombre: 'Inactivos',
+      valor: 'inactivo',
+    },
+  ]);
+
+
+
+  protected verificarTipoCredito(tipo_credito: TipoCredito): boolean {
+    return TIPOS_CREDITO_VALUES.includes(tipo_credito);
+  }
 
   protected severity(credito: Credito) {
     if (credito.estado === 'pagado') {
@@ -71,22 +96,17 @@ export default class Creditos {
   }
 
   protected severityCuotas(credito: Credito) {
-    if (credito.color_semaforo === 'verde') {
+    if (credito.color_cuotas === 'verde') {
       return 'success';
     }
-    if (credito.color_semaforo === 'amarillo') {
+    if (credito.color_cuotas === 'amarillo') {
       return 'warn';
     }
     return 'danger';
   }
 
   async ngOnInit() {
-    const hoy = new Date();
-    hoy.setHours(23, 59, 59, 999);
-    this.maxDate.set(hoy);
-
     this.cargarEmpleados();
-    await this.cargarCreditos();
   }
 
   protected buscarEmpleado(event: AutoCompleteCompleteEvent) {
@@ -116,13 +136,14 @@ export default class Creditos {
     window.URL.revokeObjectURL(url);
   }
 
-  async cargarCreditos(pagina: number = 1) {
+  private async cargarCreditos(pagina: number = 1) {
     const inicio = this.fechaInicio();
     const fin = this.fechaFin();
     const empleadoId = this.empleadoSeleccionado() ? this.empleadoSeleccionado()!.persona_id : null;
+    const estadoValue = this.estado();
 
     const res = await this.creditoService.listarCreditos(
-      this.estado(),
+      estadoValue,
       empleadoId,
       inicio ? UtilidadesFecha.formatearFecha(inicio) : null,
       fin ? UtilidadesFecha.formatearFecha(fin) : null,
@@ -150,7 +171,9 @@ export default class Creditos {
     this.fechaInicio.set(this.fechaInicioAux());
     this.fechaFin.set(hoy);
 
+    this.estado.set(null);
     this.empleadoSeleccionado.set(null);
+    this.search.set('');
     this.aplicarFiltros();
   }
 
@@ -161,5 +184,9 @@ export default class Creditos {
 
   async aplicarFiltros() {
     await this.cargarCreditos(1);
+  }
+
+  async refrescar() {
+    this.resetearFiltros();
   }
 }

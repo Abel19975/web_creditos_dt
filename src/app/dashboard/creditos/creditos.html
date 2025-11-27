@@ -4,7 +4,7 @@
       <div class="card-header">
         <h3>Créditos</h3>
       </div>
-      <div class="flex flex-col md:flex-row justify-center items-center gap-2 mb-2">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-center gap-2 mb-2">
         <p-floatlabel variant="on">
           <p-datepicker
             [(ngModel)]="fechaInicio"
@@ -12,7 +12,6 @@
             showIcon
             iconDisplay="input"
             appendTo="body"
-            [maxDate]="maxDate()"
             size="small"
             dateFormat="dd/mm/yy"
             fluid
@@ -26,7 +25,6 @@
             showIcon
             iconDisplay="input"
             appendTo="body"
-            [maxDate]="maxDate()"
             size="small"
             dateFormat="dd/mm/yy"
             fluid
@@ -42,21 +40,36 @@
           optionLabel="persona.nombre_completo"
           placeholder="Buscar por empleado"
           [(ngModel)]="empleadoSeleccionado"
+          fluid
+        />
+        <p-select
+          [options]="estadoCreditos()"
+          [(ngModel)]="estado"
+          appendTo="body"
+          optionValue="valor"
+          optionLabel="nombre"
+          [showClear]="true"
+          [checkmark]="true"
+          placeholder="Seleccionar estado"
+          class="w-full md:w-56"
+          size="small"
         />
         <p-button
           fluid
           size="small"
-          severity="danger"
-          label="Limpiar"
-          (onClick)="resetearFiltros()"
-        />
-        <p-button
-          fluid
-          size="small"
-          label="Filtrar"
           icon="pi pi-search"
+          pTooltip="Buscar"
           iconPos="right"
           (onClick)="aplicarFiltros()"
+        />
+        <p-button
+          fluid
+          size="small"
+          severity="secondary"
+          icon="pi pi-refresh"
+          iconPos="right"
+          pTooltip="Resetear"
+          (onClick)="refrescar()"
         />
       </div>
       <br />
@@ -83,19 +96,13 @@
             <th class="dark:bg-slate-800! bg-primary-100!">Cliente</th>
             <th class="dark:bg-slate-800! bg-primary-100!">Empleado</th>
             <th class="dark:bg-slate-800! bg-primary-100!">Secuencial</th>
-            <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">
-              Valor crédito
-            </th>
-            <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">
-              Tasa interes
-            </th>
+            <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">Crédito</th>
+            <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">Interes</th>
             <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">Total</th>
             <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">Pagado</th>
             <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">Saldo</th>
 
-            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: center">
-              Número cuotas
-            </th>
+            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: center">N° cuotas</th>
 
             <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">
               Valor cuotas
@@ -111,7 +118,9 @@
               Cuotas vencidas
             </th>
             <th style="text-align: center" class="dark:bg-slate-800! bg-primary-100!">Estado</th>
-
+            <th style="text-align: center" class="dark:bg-slate-800! bg-primary-100!">
+              Estado renovación
+            </th>
             <th
               style="text-align: right"
               alignFrozen="right"
@@ -169,7 +178,14 @@
               <p-tag [severity]="severityCuotas(credito)" [value]="credito.cuotas_vencidas" />
             </td>
             <td data-label="Estado" style="text-align: center">
-              <p-tag [severity]="severity(credito)" [value]="credito.estado" />
+              <p-tag
+                [severity]="credito.estado === 'pagado' ? 'success' : 'warn'"
+                [value]="credito.estado"
+              />
+            </td>
+
+            <td data-label="Estado renovación" style="text-align: center">
+              <p-tag [value]="credito.estado_renovacion" />
             </td>
 
             <td alignFrozen="right" pFrozenColumn>

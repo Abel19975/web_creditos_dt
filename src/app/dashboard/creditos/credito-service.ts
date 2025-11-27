@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Credito, FiltrosCredito, PaginationResponse } from './credito-interface';
+import { Credito } from './credito-interface';
 
 @Injectable({
   providedIn: 'root',
@@ -19,7 +19,7 @@ export class CreditoService {
   }
 
   async listarCreditos(
-    estado: string | null,
+    estado: string | boolean | null,
     otorganteId: number | null,
     fechaInicio: string | null,
     fechaFin: string | null,
@@ -29,7 +29,12 @@ export class CreditoService {
   ) {
     let params = new HttpParams();
 
-    if (estado) params = params.set('estado', estado);
+    if (typeof estado === 'boolean') {
+      params = params.set('renovado_inactivo', estado.toString());
+    } else if (estado) {
+      params = params.set('estado', estado);
+    }
+
     if (otorganteId) params = params.set('otorgante_id', otorganteId.toString());
     if (fechaInicio) params = params.set('fecha_inicio', fechaInicio);
     if (fechaFin) params = params.set('fecha_fin', fechaFin);

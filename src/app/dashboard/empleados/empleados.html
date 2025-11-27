@@ -33,19 +33,7 @@
             <th class="dark:bg-slate-800! bg-primary-100!">Apellidos</th>
             <th class="dark:bg-slate-800! bg-primary-100!">Celular</th>
             <th class="dark:bg-slate-800! bg-primary-100!">Dirección</th>
-            <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">
-              Prestado
-            </th>
-            <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">
-              Por cobrar
-            </th>
-            <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">
-              Cobrado
-            </th>
-            <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">
-              Faltante
-            </th>
-            <th style="text-align: right" class="dark:bg-slate-800! bg-primary-100!">En caja</th>
+
             <th
               style="text-align: right"
               alignFrozen="right"
@@ -74,22 +62,6 @@
             </td>
             <td data-label="Dirección">
               {{ empleado.persona.direccion }}
-            </td>
-
-            <td data-label="Prestado" style="text-align: right">
-              {{ empleado.totales.total_capital_otorgado | currency }}
-            </td>
-            <td data-label="Por cobrar" style="text-align: right">
-              {{ empleado.totales.total_a_recaudar | currency }}
-            </td>
-            <td data-label="Cobrado" style="text-align: right">
-              {{ empleado.totales.total_recaudado | currency }}
-            </td>
-            <td data-label="Faltante" style="text-align: right">
-              {{ empleado.totales.total_faltante | currency }}
-            </td>
-            <td data-label="En caja" style="text-align: right">
-              {{ empleado.totales.valor_caja | currency }}
             </td>
             <td alignFrozen="right" pFrozenColumn>
               <div class="flex justify-end gap-1">

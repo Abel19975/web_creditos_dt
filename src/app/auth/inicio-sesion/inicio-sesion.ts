@@ -2,7 +2,6 @@ import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { firstValueFrom } from 'rxjs';
 import { NgClass } from '@angular/common';
 
 import { InputGroupModule } from 'primeng/inputgroup';
