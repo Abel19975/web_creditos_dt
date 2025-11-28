@@ -1,20 +1,26 @@
-import { Component, inject, signal } from '@angular/core';
-import { CreditoService } from './credito-service';
-import { Credito, TipoCredito, TIPOS_CREDITO_VALUES } from './credito-interface';
+import { Component, inject, signal, viewChild } from '@angular/core';
 import { TableModule } from 'primeng/table';
 import { Button } from 'primeng/button';
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
-import { CajaService } from '../caja/caja-service';
-import { Empleado } from '../empleados/empleado-interface';
 import { FloatLabel } from 'primeng/floatlabel';
 import { DatePicker } from 'primeng/datepicker';
 import { AutoComplete, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
-import { FormsModule } from '@angular/forms';
+import { FormControl, FormsModule, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Select } from 'primeng/select';
+import { Dialog } from 'primeng/dialog';
+import { InputNumber } from 'primeng/inputnumber';
+import { CardModule } from 'primeng/card';
+import { DividerModule } from 'primeng/divider';
+
+import { Empleado } from '../empleados/empleado-interface';
+import { CajaService } from '../caja/caja-service';
 import { UtilidadesFecha } from '../../shared/utils/utils';
 import { FechaUtcService } from '../../shared/utils/fecha-utc-service';
-import { Select } from 'primeng/select';
+import { AlertService } from '../../shared/services/alert.service';
+import { Cliente, Credito, TipoCredito, TIPOS_CREDITO_VALUES } from './credito-interface';
+import { CreditoService } from './credito-service';
 
 @Component({
   selector: 'app-creditos',
@@ -31,18 +37,30 @@ import { Select } from 'primeng/select';
     FormsModule,
     TooltipModule,
     Select,
+    Dialog,
+    InputNumber,
+    ReactiveFormsModule,
+    CardModule,
+    DividerModule,
+    CommonModule,
   ],
   templateUrl: './creditos.html',
   styleUrl: './creditos.css',
 })
 export default class Creditos {
+  protected valorCreditoInput = viewChild.required<InputNumber>('valorCreditoInput');
+
   private creditoService = inject(CreditoService);
   private historialSvc = inject(CajaService);
   protected fechaUtcSvc = inject(FechaUtcService);
+  private alerta = inject(AlertService);
 
   protected empleadoSeleccionado = signal<Empleado | null>(null);
+  protected clienteSeleccionado = signal<Cliente | null>(null);
   private todosLosEmpleados = signal<Empleado[]>([]);
+  private todosLosClientes = signal<Cliente[]>([]);
   protected empleados = signal<Empleado[]>([]);
+  protected clientes = signal<Cliente[]>([]);
   protected creditos = signal<Credito[]>([]);
   protected pagination = signal({
     total: 0,
@@ -53,18 +71,22 @@ export default class Creditos {
     to: 0,
   });
 
-  protected search = signal('');
+  protected search = signal<string>('');
   protected estado = signal<string | null | boolean>(null);
   protected otorganteId = signal<number | null>(null);
   protected fechaInicio = signal<Date | null>(null);
   protected fechaFin = signal<Date | null>(null);
   protected fechaInicioAux = signal<Date | null>(null);
+  protected modalValorRenovacion = signal<boolean>(false);
+  protected creditoSeleccionado = signal<Credito | null>(null);
+  protected valorCredito = new FormControl(null, Validators.required);
+
+  protected esInvalidoControl() {
+    const control = this.valorCredito;
+    return control.touched && control.invalid;
+  }
 
   protected estadoCreditos = signal([
-    {
-      nombre: 'Renovados por inactivos',
-      valor: true,
-    },
     {
       nombre: 'Pagados',
       valor: 'pagado',
@@ -78,11 +100,24 @@ export default class Creditos {
       valor: 'inactivo',
     },
   ]);
+  protected estadosRenovacion = signal([
+    {
+      nombre: 'Nuevos',
+      valor: 'nuevo',
+    },
+    {
+      nombre: 'Renovados',
+      valor: 'renovado',
+    },
+    {
+      nombre: 'Inactivos',
+      valor: 'inactivo',
+    },
+  ]);
 
-
-
-  protected verificarTipoCredito(tipo_credito: TipoCredito): boolean {
-    return TIPOS_CREDITO_VALUES.includes(tipo_credito);
+  convertToNumber(value?: string) {
+    if (!value) return 0;
+    return parseFloat(value);
   }
 
   protected severity(credito: Credito) {
@@ -96,10 +131,10 @@ export default class Creditos {
   }
 
   protected severityCuotas(credito: Credito) {
-    if (credito.color_cuotas === 'verde') {
+    if (credito.color_cuotas === 'success') {
       return 'success';
     }
-    if (credito.color_cuotas === 'amarillo') {
+    if (credito.color_cuotas === 'warning') {
       return 'warn';
     }
     return 'danger';
@@ -107,6 +142,15 @@ export default class Creditos {
 
   async ngOnInit() {
     this.cargarEmpleados();
+    this.cargarClientes();
+  }
+
+  protected buscarCliente(event: AutoCompleteCompleteEvent) {
+    const query = event.query.toLowerCase();
+    const filtrados = this.todosLosClientes().filter((empleado) =>
+      empleado.persona.nombre_completo.toLowerCase().includes(query),
+    );
+    this.clientes.set(filtrados);
   }
 
   protected buscarEmpleado(event: AutoCompleteCompleteEvent) {
@@ -115,6 +159,12 @@ export default class Creditos {
       empleado.persona.nombre_completo.toLowerCase().includes(query),
     );
     this.empleados.set(filtrados);
+  }
+
+  async cargarClientes() {
+    const res = await this.historialSvc.obtenerClientes();
+    this.todosLosClientes.set(res.data);
+    this.todosLosClientes.set(res.data);
   }
 
   async cargarEmpleados() {
@@ -126,25 +176,56 @@ export default class Creditos {
   async descargarReporteDetallado(credito: Credito) {
     const pdfBlob = await this.creditoService.descargarReporteDetallado(credito.id);
     const url = window.URL.createObjectURL(pdfBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    const cliente = credito.cliente.persona.nombre_completo;
-    const secuencial = credito.secuencial;
-    const nombreArchivo = `${cliente}-${secuencial}.pdf`;
-    link.download = nombreArchivo;
-    link.click();
+
+    window.open(url, '_blank');
     window.URL.revokeObjectURL(url);
+  }
+
+  protected abrirCerrarModalRenovacion(credito?: Credito) {
+    if (!credito) {
+      this.creditoSeleccionado.set(null);
+      this.modalValorRenovacion.set(false);
+      return;
+    }
+    this.creditoSeleccionado.set(credito);
+    this.modalValorRenovacion.set(true);
+  }
+
+  protected async renovarCredito() {
+    const credito = this.creditoSeleccionado();
+    if (!credito) return;
+
+    const valor = this.valorCreditoInput().value;
+    if (!valor) {
+      this.valorCreditoInput().input.nativeElement.focus();
+      return;
+    }
+
+    const confirmar = await this.alerta.confirm({
+      title: 'Confirmación',
+      message: `¿Desea renovar el crédito ${credito.secuencial} de ${credito.cliente.persona.nombre_completo}, por un valor de $${Number(valor).toFixed(2)} ?`,
+    });
+    if (!confirmar) return;
+    const res = await this.creditoService.renovarCredito({
+      cliente_id: credito.cliente.persona_id,
+      valor_credito: valor,
+    });
+    this.abrirCerrarModalRenovacion();
+    this.alerta.exito('Éxito', res.message);
+    this.cargarCreditos();
   }
 
   private async cargarCreditos(pagina: number = 1) {
     const inicio = this.fechaInicio();
     const fin = this.fechaFin();
     const empleadoId = this.empleadoSeleccionado() ? this.empleadoSeleccionado()!.persona_id : null;
+    const clienteId = this.clienteSeleccionado() ? this.clienteSeleccionado()!.persona_id : null;
     const estadoValue = this.estado();
 
     const res = await this.creditoService.listarCreditos(
       estadoValue,
       empleadoId,
+      clienteId,
       inicio ? UtilidadesFecha.formatearFecha(inicio) : null,
       fin ? UtilidadesFecha.formatearFecha(fin) : null,
       this.search(),
@@ -173,6 +254,7 @@ export default class Creditos {
 
     this.estado.set(null);
     this.empleadoSeleccionado.set(null);
+    this.clienteSeleccionado.set(null);
     this.search.set('');
     this.aplicarFiltros();
   }

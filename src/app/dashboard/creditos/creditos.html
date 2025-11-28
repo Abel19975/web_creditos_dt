@@ -8,7 +8,7 @@
         <p-floatlabel variant="on">
           <p-datepicker
             [(ngModel)]="fechaInicio"
-            inputId="fecha_inicio_picker"
+            inputId="fecha_inicio"
             showIcon
             iconDisplay="input"
             appendTo="body"
@@ -16,12 +16,12 @@
             dateFormat="dd/mm/yy"
             fluid
           />
-          <label for="on_label">Fecha inicio</label>
+          <label for="fecha_inicio">Fecha inicio</label>
         </p-floatlabel>
         <p-floatlabel variant="on">
           <p-datepicker
             [(ngModel)]="fechaFin"
-            inputId="fecha_fin_picker"
+            inputId="fecha_fin"
             showIcon
             iconDisplay="input"
             appendTo="body"
@@ -29,31 +29,71 @@
             dateFormat="dd/mm/yy"
             fluid
           />
-          <label for="on_label">Fecha fin</label>
+          <label for="fecha_fin">Fecha fin</label>
         </p-floatlabel>
-        <p-autocomplete
-          [dropdown]="true"
-          [suggestions]="empleados()"
-          (completeMethod)="buscarEmpleado($event)"
-          size="small"
-          appendTo="body"
-          optionLabel="persona.nombre_completo"
-          placeholder="Buscar por empleado"
-          [(ngModel)]="empleadoSeleccionado"
-          fluid
-        />
-        <p-select
-          [options]="estadoCreditos()"
-          [(ngModel)]="estado"
-          appendTo="body"
-          optionValue="valor"
-          optionLabel="nombre"
-          [showClear]="true"
-          [checkmark]="true"
-          placeholder="Seleccionar estado"
-          class="w-full md:w-56"
-          size="small"
-        />
+        <p-floatlabel variant="on">
+          <p-autocomplete
+            [dropdown]="true"
+            [showClear]="true"
+            [suggestions]="empleados()"
+            (completeMethod)="buscarEmpleado($event)"
+            size="small"
+            appendTo="body"
+            optionLabel="persona.nombre_completo"
+            [(ngModel)]="empleadoSeleccionado"
+            fluid
+            inputId="empleado_id"
+          />
+          <label for="empleado_id">Empleado</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on">
+          <p-autocomplete
+            [dropdown]="true"
+            [showClear]="true"
+            [suggestions]="clientes()"
+            (completeMethod)="buscarCliente($event)"
+            size="small"
+            appendTo="body"
+            optionLabel="persona.nombre_completo"
+            [(ngModel)]="clienteSeleccionado"
+            fluid
+            inputId="cliente_id"
+          />
+          <label for="cliente_id">Cliente</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="on">
+          <p-select
+            [options]="estadoCreditos()"
+            [(ngModel)]="estado"
+            [showClear]="true"
+            [checkmark]="true"
+            appendTo="body"
+            optionValue="valor"
+            optionLabel="nombre"
+            class="w-full md:w-56"
+            size="small"
+            inputId="estado"
+          />
+
+          <label for="estado">Estado</label>
+        </p-floatlabel>
+        <p-floatlabel variant="on">
+          <p-select
+            [options]="estadosRenovacion()"
+            [showClear]="true"
+            [checkmark]="true"
+            appendTo="body"
+            optionValue="valor"
+            optionLabel="nombre"
+            class="w-full md:w-56"
+            size="small"
+            inputId="estado_renovacion"
+          />
+
+          <label for="estado_renovacion">Estado renovación</label>
+        </p-floatlabel>
+
         <p-button
           fluid
           size="small"
@@ -92,6 +132,14 @@
         <!-- header -->
         <ng-template #header>
           <tr>
+            <th
+              style="text-align: center"
+              alignFrozen="left"
+              pFrozenColumn
+              class="dark:bg-slate-800! bg-primary-100!"
+            >
+              Acciones
+            </th>
             <th class="dark:bg-slate-800! bg-primary-100!">Fecha</th>
             <th class="dark:bg-slate-800! bg-primary-100!">Cliente</th>
             <th class="dark:bg-slate-800! bg-primary-100!">Empleado</th>
@@ -117,17 +165,11 @@
             <th style="text-align: center" class="dark:bg-slate-800! bg-primary-100!">
               Cuotas vencidas
             </th>
-            <th style="text-align: center" class="dark:bg-slate-800! bg-primary-100!">Estado</th>
+            <th style="text-align: center" class="dark:bg-slate-800! bg-primary-100!">
+              Estado crédito
+            </th>
             <th style="text-align: center" class="dark:bg-slate-800! bg-primary-100!">
               Estado renovación
-            </th>
-            <th
-              style="text-align: right"
-              alignFrozen="right"
-              pFrozenColumn
-              class="dark:bg-slate-800! bg-primary-100!"
-            >
-              Acciones
             </th>
           </tr>
         </ng-template>
@@ -135,6 +177,32 @@
         <!-- body -->
         <ng-template #body let-credito>
           <tr>
+            <td alignFrozen="left" pFrozenColumn class="dark:bg-slate-800! bg-primary-100!">
+              <div class="flex justify-center gap-1">
+                @if (credito.es_renovable && credito.puede_renovar) {
+                  <p-button
+                    icon="pi pi-refresh"
+                    pTooltip="Renovar crédito por falta de pago"
+                    severity="danger"
+                    tooltipPosition="left"
+                    label="Renovar"
+                    size="small"
+                    (click)="abrirCerrarModalRenovacion(credito)"
+                  />
+                }
+                <p-button
+                  icon="pi pi-eye"
+                  class="w-full"
+                  fluid
+                  pTooltip="Ver reporte detallado"
+                  tooltipPosition="left"
+                  label="Ver"
+                  severity="info"
+                  (onClick)="descargarReporteDetallado(credito)"
+                  size="small"
+                />
+              </div>
+            </td>
             <td data-label="Fecha">
               {{ credito.fecha_credito | date: 'dd/MM/yyyy' }}
             </td>
@@ -177,28 +245,25 @@
             <td data-label="Cuotas vencidas" style="text-align: center">
               <p-tag [severity]="severityCuotas(credito)" [value]="credito.cuotas_vencidas" />
             </td>
-            <td data-label="Estado" style="text-align: center">
-              <p-tag
-                [severity]="credito.estado === 'pagado' ? 'success' : 'warn'"
-                [value]="credito.estado"
-              />
+            <td data-label="Estado crédito" style="text-align: center">
+              {{ credito.estado }}
             </td>
 
             <td data-label="Estado renovación" style="text-align: center">
-              <p-tag [value]="credito.estado_renovacion" />
-            </td>
-
-            <td alignFrozen="right" pFrozenColumn>
-              <div class="flex justify-end gap-1">
-                <p-button
-                  pTooltip="Descargar reporte detallado"
-                  tooltipPosition="left"
-                  icon="pi pi-download"
-                  rounded
-                  text
-                  (onClick)="descargarReporteDetallado(credito)"
-                />
-              </div>
+              <p-tag
+                [value]="
+                  credito.estado === 'vigente' && credito.estado_renovacion === 'inactivo'
+                    ? 'En proceso'
+                    : credito.estado_renovacion
+                "
+                [severity]="
+                  credito.estado === 'vigente' && credito.estado_renovacion === 'inactivo'
+                    ? 'info'
+                    : credito.estado_renovacion === 'inactivo'
+                      ? 'danger'
+                      : 'secondary'
+                "
+              />
             </td>
           </tr>
         </ng-template>
@@ -206,3 +271,39 @@
     </div>
   </div>
 </div>
+
+<p-dialog
+  header="Renovación de crédito"
+  [modal]="true"
+  [closable]="false"
+  [(visible)]="modalValorRenovacion"
+  [style]="{ width: '25rem' }"
+>
+  <span class="p-text-secondary"> N° {{ creditoSeleccionado()?.secuencial }} </span>
+  <div class="flex justify-between mb-8">
+    <span> Saldo </span>
+    <span class="text-red-500 text-3xl">
+      {{ creditoSeleccionado()?.saldo | currency }}
+    </span>
+  </div>
+  <p-floatlabel variant="on">
+    <p-inputnumber
+      inputId="valor_credito"
+      mode="currency"
+      currency="USD"
+      locale="en-US"
+      size="small"
+      fluid
+      [formControl]="valorCredito"
+      #valorCreditoInput
+      [invalid]="esInvalidoControl()"
+      [min]="convertToNumber(creditoSeleccionado()?.saldo)"
+    />
+    <label for="valor_credito">Valor renovación</label>
+  </p-floatlabel>
+
+  <div class="flex justify-end gap-2 mt-5">
+    <p-button label="Cancelar" severity="secondary" (onClick)="abrirCerrarModalRenovacion()" />
+    <p-button label="Renovar" (click)="renovarCredito()" />
+  </div>
+</p-dialog>

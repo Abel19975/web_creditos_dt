@@ -50,9 +50,12 @@ export interface Credito {
   ultima_fecha_pago: string;
   proxima_fecha_pago: string;
   porcentaje_cuotas_pagadas: string;
-  es_renovable: true;
+
+  puede_renovar: boolean;
+  es_renovable: boolean;
   boton_etiqueta: string;
   boton_color: string;
+
   empresa: Empresa;
   pagos: Pago[];
   created_at: Date;

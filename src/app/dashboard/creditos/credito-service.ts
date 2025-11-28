@@ -10,6 +10,12 @@ import { Credito } from './credito-interface';
 export class CreditoService {
   private http = inject(HttpClient);
 
+  async renovarCredito(datos: { cliente_id: number; valor_credito: number }) {
+    return await firstValueFrom(
+      this.http.post<{ message: string }>(`${environment.apiUrl}/creditos`, datos),
+    );
+  }
+
   async descargarReporteDetallado(creditoId: number) {
     return await firstValueFrom(
       this.http.get(`${environment.apiUrl}/creditos/${creditoId}/pdf`, {
@@ -21,6 +27,7 @@ export class CreditoService {
   async listarCreditos(
     estado: string | boolean | null,
     otorganteId: number | null,
+    clienteId: number | null,
     fechaInicio: string | null,
     fechaFin: string | null,
     search: string | null,
@@ -36,6 +43,7 @@ export class CreditoService {
     }
 
     if (otorganteId) params = params.set('otorgante_id', otorganteId.toString());
+    if (clienteId) params = params.set('cliente_id', clienteId.toString());
     if (fechaInicio) params = params.set('fecha_inicio', fechaInicio);
     if (fechaFin) params = params.set('fecha_fin', fechaFin);
     if (search) params = params.set('search', search);

@@ -4,6 +4,7 @@ import { environment } from '../../../environments/environment';
 import { firstValueFrom, map } from 'rxjs';
 import { Caja, CarteraResponse, Movimientos, TotalCaja } from './caja-interface';
 import { Empleado } from '../empleados/empleado-interface';
+import { Cliente } from '../creditos/credito-interface';
 
 @Injectable({
   providedIn: 'root',
@@ -15,6 +16,12 @@ export class CajaService {
   async registrarEgreso(datos: { monto: number; empleado_id: number; descripcion: string | null }) {
     return await firstValueFrom(
       this.http.post<{ message: string }>(`${this.url}/registrar-egreso`, datos),
+    );
+  }
+
+  async obtenerClientes() {
+    return await firstValueFrom(
+      this.http.get<{ data: Cliente[] }>(`${environment.apiUrl}/clientes`),
     );
   }
 
