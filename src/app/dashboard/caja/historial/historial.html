@@ -27,7 +27,6 @@
         <!-- header -->
         <ng-template #header>
           <tr>
-            <th class="dark:bg-slate-800! bg-primary-100!">Código empleado</th>
             <th class="dark:bg-slate-800! bg-primary-100!">Empleado</th>
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
               Caja anterior
@@ -36,16 +35,18 @@
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
               Microseguros
             </th>
-            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
-              Total ingresos
-            </th>
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">Créditos</th>
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
               Otros egresos
             </th>
+
+            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
+              Total ingresos
+            </th>
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
               Total egresos
             </th>
+
             <th
               style="text-align: right"
               alignFrozen="right"
@@ -68,9 +69,6 @@
         <!-- body -->
         <ng-template #body let-historial>
           <tr>
-            <td data-label="Código empleado">
-              {{ historial.empleado.persona.id }}
-            </td>
             <td data-label="Empleado">
               {{ historial.empleado.persona.nombre_completo }}
             </td>
@@ -83,14 +81,15 @@
             <td data-label="Microseguros" style="text-align: right">
               {{ historial.total_microseguro | currency }}
             </td>
-            <td data-label="Total ingresos" style="text-align: right">
-              {{ historial.total_ingresos | currency }}
-            </td>
+
             <td data-label="Créditos" style="text-align: right">
               {{ historial.total_desembolso | currency }}
             </td>
             <td data-label="Otros egresos" style="text-align: right">
               {{ historial.total_otros_egresos | currency }}
+            </td>
+            <td data-label="Total ingresos" style="text-align: right">
+              {{ historial.total_ingresos | currency }}
             </td>
             <td data-label="Total egresos" style="text-align: right">
               <b>
@@ -227,12 +226,14 @@
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
               Microseguros
             </th>
-            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
-              Total ingresos
-            </th>
+
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">Créditos</th>
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
               Otros egresos
+            </th>
+
+            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
+              Total ingresos
             </th>
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
               Total egresos
@@ -269,14 +270,15 @@
             <td data-label="Microseguros" style="text-align: right">
               {{ historial.total_microseguro | currency }}
             </td>
-            <td data-label="Total ingresos" style="text-align: right">
-              {{ historial.total_ingresos | currency }}
-            </td>
+
             <td data-label="Créditos" style="text-align: right">
               {{ historial.total_desembolso | currency }}
             </td>
             <td data-label="Otros egresos" style="text-align: right">
               {{ historial.total_otros_egresos | currency }}
+            </td>
+            <td data-label="Total ingresos" style="text-align: right">
+              {{ historial.total_ingresos | currency }}
             </td>
             <td data-label="Total egresos" style="text-align: right">
               {{ historial.total_egresos | currency }}
