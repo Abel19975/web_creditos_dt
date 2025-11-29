@@ -167,6 +167,7 @@
         </p-floatlabel>
         <p-autocomplete
           [dropdown]="true"
+          [showClear]="true"
           [suggestions]="empleados()"
           (completeMethod)="buscarEmpleado($event)"
           size="small"
@@ -219,9 +220,7 @@
             <th class="dark:bg-slate-800! bg-primary-100!">Código</th>
             <th class="dark:bg-slate-800! bg-primary-100!">Fecha arqueo</th>
             <th class="dark:bg-slate-800! bg-primary-100!">Empleado</th>
-            <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
-              Saldo anterior
-            </th>
+
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">Cobros</th>
             <th class="dark:bg-slate-800! bg-primary-100!" style="text-align: right">
               Microseguros
@@ -261,9 +260,7 @@
             <td data-label="Empleado">
               {{ historial.empleado.persona.nombre_completo }}
             </td>
-            <td data-label="Saldo anterior" style="text-align: right">
-              {{ historial.saldo_anterior | currency }}
-            </td>
+
             <td data-label="Cobros" style="text-align: right">
               {{ historial.total_recaudado | currency }}
             </td>
@@ -301,23 +298,22 @@
             class="bg-primary-50 dark:bg-slate-800 font-bold border-t-2 border-primary-200 dark:border-slate-700"
           >
             <td colspan="3" style="text-align: right" class="px-4 py-3">TOTALES</td>
-            <td style="text-align: right" class="px-4 py-3">
-              {{ totalesHistorial()?.saldo_anterior | currency }}
-            </td>
+
             <td style="text-align: right" class="px-4 py-3">
               {{ totalesHistorial()?.total_recaudado | currency }}
             </td>
             <td style="text-align: right" class="px-4 py-3">
               {{ totalesHistorial()?.total_microseguro | currency }}
             </td>
-            <td style="text-align: right" class="px-4 py-3">
-              {{ totalesHistorial()?.total_ingresos | currency }}
-            </td>
+
             <td style="text-align: right" class="px-4 py-3">
               {{ totalesHistorial()?.total_desembolso | currency }}
             </td>
             <td style="text-align: right" class="px-4 py-3">
               {{ totalesHistorial()?.total_otros_egresos | currency }}
+            </td>
+            <td style="text-align: right" class="px-4 py-3">
+              {{ totalesHistorial()?.total_ingresos | currency }}
             </td>
             <td style="text-align: right" class="px-4 py-3">
               {{ totalesHistorial()?.total_egresos | currency }}
